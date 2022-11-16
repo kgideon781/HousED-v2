@@ -20,6 +20,7 @@ const Navbar = () => (
                         <Link href="/" passHref>
                             <MenuItem icon={<FcHome/>}>Home</MenuItem>
                         </Link>
+
                         <Link href="/search" passHref>
                             <MenuItem icon={<BsSearch/>}>Search</MenuItem>
                         </Link>

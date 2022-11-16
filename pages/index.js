@@ -1,8 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {Flex, Box, Text, Button} from '@chakra-ui/react';
+import {Flex, Box, Text, Button, Icon} from '@chakra-ui/react';
 import {baseUrl, fetchApi} from "../utils/fetchApi";
 import Property from '../components/Property'
+import {BsFilter} from "react-icons/bs";
+import {ImPlus} from "react-icons/im";
+import SearchFilters from "../components/SearchFilters";
+import noresult from "../assets/images/noresult.svg";
+import React, {useState} from "react";
+import NewHouse from "../components/NewHouse";
 
 const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, imageUrl}) => (
     <Flex flexWrap="wrap" justifyContent="center" alignItems="center" m="10">
@@ -21,40 +27,52 @@ const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, ima
 
 export default function Home({ propertiesForSale, propertiesForRent }) {
     //console.log(propertiesForRent, propertiesForSale)
+    const [newHouse, setNewHouse] = useState(false)
   return (
-    <Box>
-        <Banner
-            purpose="RENT A HOME"
-            title1="Rental Homes for"
-            title2="Everyone"
-            desc1="Explore Apartments, Villas, Homes"
-            desc2="and more"
-            buttonText="Explore Renting"
-            linkName="/search?purpose=for-rent"
-            imageUrl="https://images.bayut.com/thumbnails/296195424-800x600.webp"
-            />
-        <Flex flexWrap="wrap">
-            {/*Fetching Data from the database*/}
-                {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}
+      <>
+          <Box>
+              <Flex cursor="pointer" bg="gray.100" borderBottom="1px" borderColor="gray.200" p="2" fontWeight="black" fontSize="lg" justifyContent="center" alignItems="center" onClick={() => setNewHouse((prevHouse) => !prevHouse)}>
+                  <Text>Add a new property</Text>
+                  <Icon paddingLeft="2" w="7" as={ImPlus}></Icon>
+              </Flex>
+              {newHouse && <NewHouse/>}
 
-        </Flex>
+          </Box>
+          <Box>
+              <Banner
+                  purpose="RENT A HOME"
+                  title1="Rental Homes for"
+                  title2="Everyone"
+                  desc1="Explore Apartments, Villas, Homes"
+                  desc2="and more"
+                  buttonText="Explore Renting"
+                  linkName="/search?purpose=for-rent"
+                  imageUrl="https://images.bayut.com/thumbnails/296195424-800x600.webp"
+              />
+              <Flex flexWrap="wrap">
+                  {/*Fetching Data from the database*/}
+                  {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}
 
-        <Banner
-            purpose="Buy A HOME"
-            title1="Find, Buy & Own Your"
-            title2="Home"
-            desc1="Explore Apartments, Villas, Homes"
-            desc2="and more"
-            buttonText="Explore Buying"
-            linkName="/search?purpose=for-sale"
-            imageUrl="https://images.bayut.com/thumbnails/294251565-800x600.webp"
-        />
+              </Flex>
 
-        <Flex flexWrap="wrap">
-            {/*Fetching Data from the database*/}
-            {propertiesForSale.map((property) => <Property property={property} key={property.id}/>)}
-        </Flex>
-    </Box>
+              <Banner
+                  purpose="Buy A HOME"
+                  title1="Find, Buy & Own Your"
+                  title2="Home"
+                  desc1="Explore Apartments, Villas, Homes"
+                  desc2="and more"
+                  buttonText="Explore Buying"
+                  linkName="/search?purpose=for-sale"
+                  imageUrl="https://images.bayut.com/thumbnails/294251565-800x600.webp"
+              />
+
+              <Flex flexWrap="wrap">
+                  {/*Fetching Data from the database*/}
+                  {propertiesForSale.map((property) => <Property property={property} key={property.id}/>)}
+              </Flex>
+          </Box>
+      </>
+
   )
 }
 
