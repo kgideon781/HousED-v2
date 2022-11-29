@@ -9,6 +9,8 @@ import SearchFilters from "../components/SearchFilters";
 import noresult from "../assets/images/noresult.svg";
 import React, {useState} from "react";
 import NewHouse from "../components/NewHouse";
+import {useCollection} from "react-firebase-hooks/firestore";
+import {db} from "../firebase";
 
 const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, imageUrl}) => (
     <Flex flexWrap="wrap" justifyContent="center" alignItems="center" m="10">
@@ -28,6 +30,11 @@ const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, ima
 export default function Home({ propertiesForSale, propertiesForRent }) {
     //console.log(propertiesForRent, propertiesForSale)
     const [newHouse, setNewHouse] = useState(false)
+    const [realtimeProperties] = useCollection(
+        db.collection("properties").orderBy("timestamp", "desc")
+
+    )
+
   return (
       <>
           <Box>
@@ -51,7 +58,23 @@ export default function Home({ propertiesForSale, propertiesForRent }) {
               />
               <Flex flexWrap="wrap">
                   {/*Fetching Data from the database*/}
-                  {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}
+                 {/* {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}*/}
+                  {realtimeProperties?.docs.map((property) => (
+                      <Property
+                          key={property.id}
+                          propertyID={property.id}
+                          coverPhoto={property.data().coverPhoto}
+                          price={property.data().price}
+                          rentFrequency={property.data().rentFrequency}
+                          rooms={property.data().rooms}
+                          title={property.data().title}
+                          baths={property.data().baths}
+                          area={property.data().area}
+                          agency={property.data().agency}
+                          isVerified={property.data().isVerified}
+                          externalID={property.data().externalID}
+                      />
+                  ))}
 
               </Flex>
 

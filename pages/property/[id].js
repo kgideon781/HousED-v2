@@ -6,59 +6,71 @@ import millify from "millify";
 import {baseUrl, fetchApi} from "../../utils/fetchApi";
 import ImageScrollbar from "../../components/ImageScrollbar";
 
-const PropertyDetails = ({ propertyDetails: { price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos } }) => (
+import {useEffect, useState} from "react";
+import {db} from "../../firebase";
+import {useCollection} from "react-firebase-hooks/firestore";
 
 
-    <Box maxWidth="1000px" margin="auto" p="4">
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID}}/*{ price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID }*/) => {
 
+
+    const [property, setProperty] = useState(null)
+    console.log(price)
+
+
+
+    return (
         <Box maxWidth="1000px" margin="auto" p="4">
-            {photos && <ImageScrollbar data={photos}/>}
-            <Box w="full" p="6">
-                <Flex paddingTop="2" alignItems="center" justifyContent="space-between">
-                    <Flex alignItems="center">
-                        <Box paddingRight="3" color="green.400">
-                            {isVerified && <GoVerified/>}
-                        </Box>
-                        <Text fontWeight="bold" fontSize="lg">KES {millify(price)}{rentFrequency && `/${rentFrequency}`}</Text>
-                    </Flex>
 
-                    <Box>
-                        <Avatar size="sm" src={agency?.logo?.url}/>
-                    </Box>
-
-
-                </Flex>
-                <Flex alignItems="center" p="1" justifyContent="space-between" w="250px" color="blue.400">
-                    {rooms} <FaBed/> |{baths} <FaBath/> {millify(area)} sqft <BsGridFill/>
-                </Flex>
-                <Box marginTop="2">
-                    <Text fontSize="lg" marginBottom="2" fontWeight="bold">
-                        {title}
-                    </Text>
-                    <Text lineHeight="2" color="gray.600">{description}</Text>
-                </Box>
-                <Flex flexWrap='wrap' textTransform='uppercase' justifyContent='space-between'>
-                    <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
-                        <Text>Type</Text>
-                        <Text fontWeight="bold">{type}</Text>
-                    </Flex>
-                    <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
-                        <Text>Purpose</Text>
-                        <Text fontWeight="bold">{purpose}</Text>
-                    </Flex>
-                    {furnishingStatus && (
-                        <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
-                            <Text>Furnishing Status</Text>
-                            <Text fontWeight="bold">{furnishingStatus}</Text>
+            <Box maxWidth="1000px" margin="auto" p="4">
+                {photos && <ImageScrollbar data={photos}/>}
+                <Box w="full" p="6">
+                    <Flex paddingTop="2" alignItems="center" justifyContent="space-between">
+                        <Flex alignItems="center">
+                            <Box paddingRight="3" color="green.400">
+                                {isVerified && <GoVerified/>}
+                            </Box>
+                            <Text fontWeight="bold"
+                                  fontSize="lg">KES {millify(price)}{rentFrequency && `/${rentFrequency}`}</Text>
                         </Flex>
-                    )}
-                </Flex>
-            </Box>
-            <Box>
-                {amenities.length && <Text fontSize="2xl" fontWeight="black" marginTop="5">Amenities</Text>}
-                <Flex flexWrap="wrap">
-                    {amenities.map((item) => (
-                        item.amenities.map((amenity) => (
+
+                        <Box>
+                            <Avatar size="sm" src={agency?.logo?.url}/>
+                        </Box>
+
+
+                    </Flex>
+                    <Flex alignItems="center" p="1" justifyContent="space-between" w="250px" color="blue.400">
+                        {rooms} <FaBed/> |{baths} <FaBath/> {millify(area)} sqft <BsGridFill/>
+                    </Flex>
+                    <Box marginTop="2">
+                        <Text fontSize="lg" marginBottom="2" fontWeight="bold">
+                            {title}
+                        </Text>
+                        <Text lineHeight="2" color="gray.600">{description}</Text>
+                    </Box>
+                    <Flex flexWrap='wrap' textTransform='uppercase' justifyContent='space-between'>
+                        <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
+                            <Text>Type</Text>
+                            <Text fontWeight="bold">{type}</Text>
+                        </Flex>
+                        <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
+                            <Text>Purpose</Text>
+                            <Text fontWeight="bold">{purpose}</Text>
+                        </Flex>
+                        {furnishingStatus && (
+                            <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100"
+                                  p="3">
+                                <Text>Furnishing Status</Text>
+                                <Text fontWeight="bold">{furnishingStatus}</Text>
+                            </Flex>
+                        )}
+                    </Flex>
+                </Box>
+                <Box>
+                    {amenities?.length && <Text fontSize="2xl" fontWeight="black" marginTop="5">Amenities</Text>}
+                    <Flex flexWrap="wrap">
+                        {amenities?.map((amenity) => (
                             <Text
                                 fontWeight="bold"
                                 color="blue.400"
@@ -69,23 +81,28 @@ const PropertyDetails = ({ propertyDetails: { price,rentFrequency, rooms, area, 
                                 borderRadius="5"
                                 key={amenity.text}
 
-                        >{amenity.text}</Text>
-                        ))
-                    ))}
-                </Flex>
+                            >{amenity}</Text>
+
+                        ))}
+                    </Flex>
+                </Box>
             </Box>
         </Box>
-    </Box>
-);
+    )
 
+};
 export async function getServerSideProps({ params: {id}} ){
-    const data = await fetchApi(`${baseUrl}/properties/detail?externalID=${id}`)
+    const doc = await db.collection("properties").doc(id).get()
+    console.log(id)
+    const data = doc.data()
 
-    return{
+    if (!data) return { notFound: true };
+    return {
         props: {
-            propertyDetails: data
+            propertyDetails: JSON.parse(JSON.stringify(data))
         }
-    }
+    };
 }
+
 
 export default PropertyDetails;
