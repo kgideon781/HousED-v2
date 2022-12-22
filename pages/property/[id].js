@@ -14,14 +14,11 @@ import {useCollection} from "react-firebase-hooks/firestore";
 const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID}}/*{ price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID }*/) => {
 
 
-    const [property, setProperty] = useState(null)
-    console.log(price)
 
 
 
     return (
         <Box maxWidth="1000px" margin="auto" p="4">
-
             <Box maxWidth="1000px" margin="auto" p="4">
                 {photos && <ImageScrollbar data={photos}/>}
                 <Box w="full" p="6">

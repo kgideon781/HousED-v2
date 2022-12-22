@@ -5,6 +5,7 @@ import NProgress from 'nprogress'
 import { ChakraProvider} from "@chakra-ui/react";
 import Layout from "../components/Layout";
 import 'nprogress/nprogress.css';
+import {BrowserRouter, Router as Ruoter} from "react-router-dom";
 
 
 
@@ -26,11 +27,13 @@ function MyApp({ Component, pageProps }) {
             <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css' integrity='sha512-42kB9yDlYiCEfx2xVwq0q7hTDNEpUTHQoQUJMHLrErGJyHg89uy71MyuHxGJMg3mHkUt9nNuTDxunHF0/EgxLQ==' crossOrigin='anonymous' referrerPolicy='no-referrer' />
             <title>HousED - Find a Home</title>
         </Head>
-        <ChakraProvider>
-          <Layout>
-            <Component {...pageProps}/>
-          </Layout>
-        </ChakraProvider>
+             <ChakraProvider>
+                     <Layout>
+                         <Component {...pageProps}/>
+                     </Layout>
+             </ChakraProvider>
+
+
       </>
   )
 }

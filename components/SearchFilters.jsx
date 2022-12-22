@@ -10,22 +10,35 @@ import Router from 'next/router';
 const SearchFilters = () => {
     const [filters, setFilters] = useState(filterData);
     const router = useRouter();
+    const path = router.pathname;
+    const { query } = router;
 
     const searchProperties = (filterValues) => {
         const path = router.pathname;
         const { query } = router;
+
 
         const values = getFilterValues(filterValues);
 
         values.forEach((item) => {
             if (item.value && filterValues?.[item.name]){
                 query[item.name] = item.value
+
             }
 
         })
 
         router.push({pathname: path, query})
+
+
+
+
     }
+    const clearFilters = () => {
+        router.replace('/search', undefined, { shallow: true })
+    }
+
+
 
     return(
         <Flex bg="gray.100" p="4" justifyContent="center" flexWrap="wrap">
@@ -44,6 +57,7 @@ const SearchFilters = () => {
                     </Select>
                 </Box>
             ))}
+            <Button color="red.400" top="2" p="4" onClick={clearFilters}>Clear Filters</Button>
 
         </Flex>
     )

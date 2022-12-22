@@ -3,7 +3,7 @@ import Image from 'next/image';
 import {Menu, Box, Text, MenuButton, MenuList, IconButton, Flex, Spacer, MenuItem} from '@chakra-ui/react';
 import {FcMenu, FcHome, FcAbout} from "react-icons/fc";
 import {BsSearch} from "react-icons/bs";
-import {FiKey} from "react-icons/fi";
+import {FiKey, FiPlus} from "react-icons/fi";
 
 const Navbar = () => (
 
@@ -29,6 +29,9 @@ const Navbar = () => (
                         </Link>
                         <Link href="/search?purpose=for-rent" passHref>
                             <MenuItem icon={<FiKey/>}>Rent Property</MenuItem>
+                        </Link>
+                        <Link href="/create" passHref>
+                            <MenuItem icon={<FiPlus/>}>List a Property</MenuItem>
                         </Link>
                     </MenuList>
 

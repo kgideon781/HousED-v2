@@ -1,14 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Flex, Box, Text, Button, Icon} from '@chakra-ui/react';
-import {baseUrl, fetchApi} from "../utils/fetchApi";
 import Property from '../components/Property'
-import {BsFilter} from "react-icons/bs";
 import {ImPlus} from "react-icons/im";
-import SearchFilters from "../components/SearchFilters";
-import noresult from "../assets/images/noresult.svg";
 import React, {useState} from "react";
-import NewHouse from "../components/NewHouse";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {db} from "../firebase";
 
@@ -26,14 +21,23 @@ const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, ima
 
     </Flex>
 )
+export const addLike = (propertyID) => {
+    console.log(propertyID)
+}
 
-export default function Home({ propertiesForSale, propertiesForRent }) {
-    //console.log(propertiesForRent, propertiesForSale)
+function Home(){
+
     const [newHouse, setNewHouse] = useState(false)
-    const [realtimeProperties] = useCollection(
-        db.collection("properties").orderBy("timestamp", "desc")
-
+    const [properties] = useCollection(db.collection("properties"))
+    const [propertiesForRent] = useCollection(
+        db.collection("properties")
+            .where("purpose", "==", "for-rent")
     )
+    const [propertiesForSale] = useCollection(
+        db.collection("properties")
+            .where("purpose", "==", "for-sale")
+    )
+
 
   return (
       <>
@@ -42,7 +46,7 @@ export default function Home({ propertiesForSale, propertiesForRent }) {
                   <Text>Add a new property</Text>
                   <Icon paddingLeft="2" w="7" as={ImPlus}></Icon>
               </Flex>
-              {newHouse && <NewHouse/>}
+
 
           </Box>
           <Box>
@@ -57,9 +61,11 @@ export default function Home({ propertiesForSale, propertiesForRent }) {
                   imageUrl="https://images.bayut.com/thumbnails/296195424-800x600.webp"
               />
               <Flex flexWrap="wrap">
-                  {/*Fetching Data from the database*/}
-                 {/* {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}*/}
-                  {realtimeProperties?.docs.map((property) => (
+                  {/* Fetching Data from the database
+                  {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}*/}
+                  {propertiesForRent?.docs.map((property) => (
+
+
                       <Property
                           key={property.id}
                           propertyID={property.id}
@@ -90,24 +96,30 @@ export default function Home({ propertiesForSale, propertiesForRent }) {
               />
 
               <Flex flexWrap="wrap">
-                  {/*Fetching Data from the database*/}
-                  {propertiesForSale.map((property) => <Property property={property} key={property.id}/>)}
+
+                  {propertiesForSale?.docs.map((property) => (
+
+
+                      <Property
+                          key={property.id}
+                          propertyID={property.id}
+                          coverPhoto={property.data().coverPhoto}
+                          price={property.data().price}
+                          rentFrequency={property.data().rentFrequency}
+                          rooms={property.data().rooms}
+                          title={property.data().title}
+                          baths={property.data().baths}
+                          area={property.data().area}
+                          agency={property.data().agency}
+                          isVerified={property.data().isVerified}
+                          externalID={property.data().externalID}
+                      />
+                  ))}
+
               </Flex>
           </Box>
       </>
 
   )
 }
-
-export async function getStaticProps(){
-    const propertyForSale = await fetchApi(`${baseUrl}/properties/list?locationExternalIDs=5002&purpose=for-sale&hitsPerPage=6`)
-    const propertyForRent = await fetchApi(`${baseUrl}/properties/list?locationExternalIDs=5002&purpose=for-rent&hitsPerPage=6`)
-
-
-    return {
-        props:{
-            propertiesForSale: propertyForSale?.hits,
-            propertiesForRent: propertyForRent?.hits,
-        }
-    }
-}
+export default Home;

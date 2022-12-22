@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {db} from "../firebase";
 
 export const baseUrl = 'https://bayut.p.rapidapi.com'
 

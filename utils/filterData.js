@@ -25,7 +25,7 @@ export const filterData = [
             { name: '40,000', value: '40000' },
             { name: '50,000', value: '50000' },
             { name: '60,000', value: '60000' },
-            { name: '85,000', value: '85000' },
+            { name: '85,000', value: 85000 },
         ],
         placeholder: 'Min Price(AED)',
         queryName: 'minPrice',
@@ -34,7 +34,7 @@ export const filterData = [
         items: [
             { name: '50,000', value: '50000' },
             { name: '60,000', value: '60000' },
-            { name: '85,000', value: '85000' },
+            { name: '85,000', value: 85000 },
             { name: '110,000', value: '110000' },
             { name: '135,000', value: '135000' },
             { name: '160,000', value: '160000' },
@@ -49,7 +49,7 @@ export const filterData = [
             { name: '900,000', value: '900000' },
             { name: '1000,000', value: '1000000' },
         ],
-        placeholder: 'Max Price(AED)',
+        placeholder: 'Max Price(Ksh.)',
         queryName: 'maxPrice',
     },
     {
