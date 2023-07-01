@@ -167,6 +167,8 @@ const MenuLinks = ({ isOpen }) => {
                         <Flex alignItems={"center"} p={"2%"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiLogOut} />
                             <MenuItem onClick={handleLogout}>Logout</MenuItem>
+
+                            <Text></Text>
                         </Flex>
 
 
