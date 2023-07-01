@@ -1,44 +1,200 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import {Menu, Box, Text, MenuButton, MenuList, IconButton, Flex, Spacer, MenuItem} from '@chakra-ui/react';
-import {FcMenu, FcHome, FcAbout} from "react-icons/fc";
-import {BsSearch} from "react-icons/bs";
-import {FiKey, FiPlus} from "react-icons/fi";
+import {Avatar, Box, Button, Flex, Icon, Menu, MenuButton, MenuList, Stack, Text} from "@chakra-ui/react";
+import {useEffect, useState} from "react";
+import {auth, db} from "../firebase";
+import {BiChevronDown, BiCog, BiHome, BiLogOut, BiUser} from "react-icons/bi";
+import { signOut } from 'firebase/auth';
 
-const Navbar = () => (
 
-    <Flex p="2" borderBottom="1px" borderColor="gray.100">
-        <Box fontSize="3xl" color="blue.400" fontWeight="bold">
-            <Link href="/" paddingLeft="2">HousED</Link>
 
+const Navbar = (props) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+
+    const toggle = () => setIsOpen(!isOpen);
+
+
+
+    return (
+        <NavBarContainer  {...props}>
+            <Box fontSize="3xl" color="blue.400" fontWeight="bold">
+                <Link href={"/"} color={"blue.400"}>HousED</Link>
+            </Box>
+
+            <MenuToggle toggle={toggle} isOpen={isOpen} />
+            <MenuLinks isOpen={isOpen} />
+        </NavBarContainer>
+    );
+};
+const CloseIcon = () => (
+    <svg width="24" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <title>Close</title>
+        <path
+            fill="#4299E1"
+            d="M9.00023 7.58599L13.9502 2.63599L15.3642 4.04999L10.4142 8.99999L15.3642 13.95L13.9502 15.364L9.00023 10.414L4.05023 15.364L2.63623 13.95L7.58623 8.99999L2.63623 4.04999L4.05023 2.63599L9.00023 7.58599Z"
+        />
+    </svg>
+);
+
+const MenuIcon = () => (
+    <svg
+        width="24px"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+        fill={"#4299E1"}
+    >
+        <title>Menu</title>
+        <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+    </svg>
+);
+
+const MenuToggle = ({ toggle, isOpen }) => {
+    return (
+        <Box display={{ base: "block", md: "none" }} onClick={toggle}>
+            {isOpen ? <CloseIcon /> : <MenuIcon />}
         </Box>
-        <Spacer/>
-        <Box>
-            <Menu>
-                <MenuButton as={IconButton} icon={<FcMenu/>} variant="outlined" color="red.400"/>
+    );
+};
+
+const MenuItem = ({ children, isLast, to = "/", ...rest }) => {
+    return (
+        <Link href={to}>
+            <Text display="block" {...rest}>
+                {children}
+            </Text>
+        </Link>
+    );
+};
+
+const MenuLinks = ({ isOpen }) => {
+    const [currentUser, setCurrentUser] = useState(null)
+    const [role, setRole] = useState('subscriber')
+
+
+    const handleLogout = async () => {
+        try {
+            await auth.signOut();
+            console.log('Logout successful')
+        } catch (error) {
+            // Handle logout error
+            console.error('Logout error:', error);
+        }
+    };
+
+
+    useEffect(() => {
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                setCurrentUser(user.uid)
+                //console.log(user.uid)
+                const usersRef = db.collection('users').doc(user.uid)
+
+                //check if the logged in user's role is subscriber in firestore database
+                usersRef?.onSnapshot((user) => {
+                    if (user.data()?.role === 'subscriber') {
+                        setRole('subscriber')
+                    } else {
+                        setRole('admin')
+                    }
+                })
+            } else {
+                setCurrentUser(null)
+            }
+        })
+    }, [currentUser])
+    return (
+        <Box
+            display={{ base: isOpen ? "block" : "none", md: "block" }}
+            flexBasis={{ base: "100%", md: "auto" }}
+        >
+            <Stack
+                spacing={8}
+                align="center"
+                justify={["center", "space-between", "flex-end", "flex-end"]}
+                direction={["column", "row", "row", "row"]}
+                pt={[4, 4, 0, 0]}
+                fontWeight="bold"
+            >
+                <MenuItem to="/">Home</MenuItem>
+                {role !== 'subscriber' && <MenuItem to="/create">List a Property</MenuItem>}
+                <MenuItem to="/search?purpose=for-rent">Rent Property </MenuItem>
+                <MenuItem to="/search?purpose=for-sale">Buy Property </MenuItem>
+                <MenuItem to="/about-us">About us </MenuItem>
+                <MenuItem to="/search" isLast>
+                    <Button
+                        size="sm"
+                        rounded="md"
+                        color={"white"}
+                        bg={["blue.400", "blue.400", "black.500", "black.500"]}
+                        _hover={{
+                            bg: ["black.100", "black.100", "black.600", "black.600"]
+                        }}
+                    >
+                        Search
+                    </Button>
+                </MenuItem>
+                {currentUser && <Menu>
+                    <MenuButton
+                        as={Button}
+                        rightIcon={<BiChevronDown />}
+                        size="sm"
+                        rounded="md"
+                        color="white"
+                        bg={["gray.300", "gray.300", "black.200", "black.200"]}
+
+                        _hover={{
+                            bg: ["blue.400", "blue.400", "black.500", "black.500"],
+                        }}
+                    >
+                        <Avatar size="sm" name="John Doe" src="/path/to/avatar.jpg" />
+                    </MenuButton>
                     <MenuList>
-                        <Link href="/" passHref>
-                            <MenuItem icon={<FcHome/>}>Home</MenuItem>
-                        </Link>
+                        {/* Add your user account menu items here */}
+                        <Flex alignItems={"center"} p={"2%"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiUser} />
+                            <MenuItem to={"/my-profile"}>Your Profile</MenuItem>
+                        </Flex>
+                        <Flex alignItems={"center"} p={"2%"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiHome} />
+                            {role !== 'subscriber' ? <MenuItem to="/my-properties">My Properties</MenuItem> : <MenuItem to="/register-agency">Register Agency</MenuItem>}
 
-                        <Link href="/search" passHref>
-                            <MenuItem icon={<BsSearch/>}>Search</MenuItem>
-                        </Link>
-                        <Link href="/search?purpose=for-sale" passHref>
-                            <MenuItem icon={<FcAbout/>}>Buy Property</MenuItem>
-                        </Link>
-                        <Link href="/search?purpose=for-rent" passHref>
-                            <MenuItem icon={<FiKey/>}>Rent Property</MenuItem>
-                        </Link>
-                        <Link href="/create" passHref>
-                            <MenuItem icon={<FiPlus/>}>List a Property</MenuItem>
-                        </Link>
+                        </Flex>
+                        <Flex alignItems={"center"} p={"2%"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiCog} />
+                            <MenuItem to={"/settings"}>Settings</MenuItem>
+                        </Flex>
+
+                        <Flex alignItems={"center"} p={"2%"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiLogOut} />
+                            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                        </Flex>
+
+
                     </MenuList>
+                </Menu>}
 
-            </Menu>
+            </Stack>
         </Box>
+    );
+};
 
-    </Flex>
-
-)
+const NavBarContainer = ({ children, ...props }) => {
+    return (
+        <Flex
+            as="nav"
+            align="center"
+            justify="space-between"
+            wrap="wrap"
+            w="100%"
+            mb={8}
+            p={4}
+            bg={["black.500", "black.500", "transparent", "transparent"]}
+            color={["blue.400", "blue.400", "black.700", "black.700"]}
+            borderBottom="1px" borderColor="gray.100"
+            {...props}
+        >
+            {children}
+        </Flex>
+    );
+};
 export default Navbar;

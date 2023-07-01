@@ -10,12 +10,14 @@ import {
     Radio,
     RadioGroup, Select, SimpleGrid,
     Text,
-    Textarea
+    Textarea, Image, IconButton
 } from "@chakra-ui/react";
 import {Form} from "react-router-dom";
 import {db} from "../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import { useToast } from '@chakra-ui/react';
+import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
+import firebase from "firebase";
 
 
 const Form1 = ({ formData, setFormData }) => {
@@ -368,9 +370,8 @@ const Form3 = () => {
 export default function multistep() {
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(33.33);
-    const [realProps] = useCollection(db.collection("properties"))
+    const [selectedImages, setSelectedImages] = useState([]);
     const toast = useToast()
-    const [imageToPost, setImageToPost] = useState(null)
     const [formData, setFormData] = useState({
         title: "",
         purpose: "",
@@ -384,6 +385,16 @@ export default function multistep() {
 
     })
 
+    const handleFileChange = (event) => {
+        const files = event.target.files;
+        const selectedImagesArray = Array.from(files);
+        setSelectedImages(selectedImagesArray);
+    };
+    const handleRemoveImage = (imageName) => {
+        setSelectedImages((prevSelectedImages) =>
+            prevSelectedImages.filter((image) => image.name !== imageName)
+        );
+    };
 
 
     const submitProperty = (e) => {
@@ -403,7 +414,8 @@ export default function multistep() {
             isVerified: false,
             rooms: formData.rooms,
             type: "Rental Apartment",
-            amenities: ["balcony", "airport nearby", "shopping mall", "grocery market", "stadium", "basketball court", "indoor pool", "Jacuzzi", "helipad"]
+            amenities: ["balcony", "airport nearby", "shopping mall", "grocery market", "stadium", "basketball court", "indoor pool", "Jacuzzi", "helipad"],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         }).then(r => {
             toast({
                 title: `Property with id ${r.id} was posted successfully.`,
@@ -419,9 +431,9 @@ export default function multistep() {
 
     }
 
-
     return (
-        <>
+        <Flex width="100%" flexWrap={"wrap"}>
+            {/*Left form*/}
             <Box
                 borderWidth="1px"
                 rounded="lg"
@@ -485,12 +497,40 @@ export default function multistep() {
                     </Flex>
                 </ButtonGroup>
             </Box>
-        </>
+            {/*Right form*/}
+            {/*multiple image picker*/}
+            <Box
+                borderWidth="1px"
+                rounded="lg"
+                shadow="1px 1px 3px rgba(0,0,0,0.3)"
+                maxWidth={800}
+                p={6}
+                m="10px auto"
+                as="form">
+                <Text fontSize="xl" fontWeight="bold" mb="5%">
+                    Upload Images
+                </Text>
+                <Input p={"4px"} type="file" multiple onChange={handleFileChange} />
+                <SimpleGrid columns={2} spacing="10px" mt="2">
+                    {selectedImages.map((image) => (
+                        <Box position="relative">
+                            <Image key={image.name} src={URL.createObjectURL(image)} alt={image.name} boxSize="200px" objectFit="contain" />
+                            <IconButton
+                                onClick={() => handleRemoveImage(image.name)}
+                                position="absolute"
+                                top="0"
+                                right="0"
+                                zIndex="1"
+                                aria-label="Remove image"
+                                colorScheme={"red"}
+                                size={"sm"}
+                                icon={<CloseIcon />}
+                            />
+                        </Box>
+                    ))}
+                </SimpleGrid>
+
+            </Box>
+        </Flex>
     );
 }
-
-
-
-
-
-

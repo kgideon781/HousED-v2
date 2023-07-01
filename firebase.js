@@ -3,7 +3,7 @@ import "firebase/storage";
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB8g4WwD4izSzBwC9r8FgvaDw9YnSWka5s",
+    apiKey: "AIzaSyChMvCE7bUN4BoUmG18DyXe51512fyj9n0",
     authDomain: "houseed-50461.firebaseapp.com",
     projectId: "houseed-50461",
     storageBucket: "houseed-50461.appspot.com",
@@ -14,5 +14,6 @@ const firebaseConfig = {
 const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
 const db = app.firestore();
 const storage = firebase.storage();
+const auth = firebase.auth();
 
-export { db, storage };
+export { db, storage, auth };

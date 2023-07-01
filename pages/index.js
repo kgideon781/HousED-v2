@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {Flex, Box, Text, Button, Icon} from '@chakra-ui/react';
+import {Flex, Box, Text, Button, Icon, useToast} from '@chakra-ui/react';
 import Property from '../components/Property'
 import {ImPlus} from "react-icons/im";
 import React, {useState} from "react";
 import {useCollection} from "react-firebase-hooks/firestore";
-import {db} from "../firebase";
+import {auth, db} from "../firebase";
+import firebase from "firebase";
+import Navbar from "../components/Navbar";
 
 const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, imageUrl}) => (
     <Flex flexWrap="wrap" justifyContent="center" alignItems="center" m="10">
@@ -21,8 +23,13 @@ const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, ima
 
     </Flex>
 )
+
 export const addLike = (propertyID) => {
-    console.log(propertyID)
+    db.collection('properties').doc(propertyID).collection("likes").doc(auth.currentUser.uid).set({
+        liked: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(r => console.log("liked")).catch(e => console.log(e))
+
 }
 
 function Home(){
@@ -37,18 +44,14 @@ function Home(){
         db.collection("properties")
             .where("purpose", "==", "for-sale")
     )
+    const currentUser = auth.currentUser ? auth.currentUser.uid : null;
 
 
-  return (
+
+
+
+    return (
       <>
-          <Box>
-              <Flex cursor="pointer" bg="gray.100" borderBottom="1px" borderColor="gray.200" p="2" fontWeight="black" fontSize="lg" justifyContent="center" alignItems="center" onClick={() => setNewHouse((prevHouse) => !prevHouse)}>
-                  <Text>Add a new property</Text>
-                  <Icon paddingLeft="2" w="7" as={ImPlus}></Icon>
-              </Flex>
-
-
-          </Box>
           <Box>
               <Banner
                   purpose="RENT A HOME"
@@ -79,6 +82,8 @@ function Home(){
                           agency={property.data().agency}
                           isVerified={property.data().isVerified}
                           externalID={property.data().externalID}
+                          currentUser={currentUser}
+                          timestamp={property.data().timestamp}
                       />
                   ))}
 
@@ -113,11 +118,14 @@ function Home(){
                           agency={property.data().agency}
                           isVerified={property.data().isVerified}
                           externalID={property.data().externalID}
+                          currentUser={currentUser}
                       />
                   ))}
 
               </Flex>
           </Box>
+
+          {/*TODO: Add sliding images to the homepage in every property*/}
       </>
 
   )
