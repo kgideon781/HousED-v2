@@ -1,5 +1,4 @@
 import {Box, Text } from "@chakra-ui/react";
-import {MdStarHalf} from "react-icons/md";
 import {IoMdStar, IoMdStarOutline} from "react-icons/io";
 import {useEffect, useState} from "react";
 const RatingBar = ({ initialRating, onRatingChange  }) => {

@@ -3,8 +3,6 @@ import {Avatar, Box, Button, Flex, Icon, Menu, MenuButton, MenuList, Stack, Text
 import {useEffect, useState} from "react";
 import {auth, db} from "../firebase";
 import {BiChevronDown, BiCog, BiHome, BiLogOut, BiUser} from "react-icons/bi";
-import { signOut } from 'firebase/auth';
-
 
 
 const Navbar = (props) => {

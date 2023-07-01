@@ -19,8 +19,8 @@ import {GoVerified} from "react-icons/go";
 import {MdStarHalf} from "react-icons/md";
 import millify from "millify";
 import defaultImage from '../assets/images/defaultImage.jpg'
-import { BiLike } from "react-icons/Bi";
-import { IoMdShare } from "react-icons/Io";
+import { BiLike } from "react-icons/bi";
+import { IoMdShare } from "react-icons/io";
 import {addLike, countLikes} from "../pages/index";
 
 import {useRouter} from "next/router";
@@ -43,10 +43,6 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
 
     const [averageRating, setAverageRating] = useState(0);
 
-
-
-
-    //setLikes(likesRef?.docs.length);
     const saveRating = async (rating) => {
         try {
             const ratingRef = db.collection("properties").doc(propertyID).collection("ratings").doc(currentUser);
@@ -86,6 +82,9 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
     const closeModal = () => {
         setIsOpen(false);
     };
+    useEffect(() => {
+
+    });
 
 
 
