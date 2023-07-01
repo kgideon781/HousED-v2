@@ -122,7 +122,7 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
             <Flex flexWrap="wrap" w="420px" p="5" paddingTop="0" justifyContent="flex-start" cursor="pointer">
                 <Link href={`/property/${propertyID}`} passHref>
                     <Box>
-                        {timestamp && <Text>Posted {timestamp}</Text>}
+                        {/*{timestamp && <Text>Posted {timestamp}</Text>}*/}
                         <Image src={coverPhoto ? coverPhoto : defaultImage} width={400} height={260} alt="Image"/>
                     </Box>
 
