@@ -13,7 +13,7 @@ import {
     Textarea, Image, IconButton
 } from "@chakra-ui/react";
 import {Form} from "react-router-dom";
-import {db, storage} from "../firebase";
+import {auth, db, storage} from "../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import { useToast } from '@chakra-ui/react';
 import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
@@ -387,6 +387,8 @@ export default function multistep() {
     const [progress, setProgress] = useState(33.33);
     const [selectedImages, setSelectedImages] = useState([]);
     const toast = useToast()
+    const currentUser = auth?.currentUser;
+    const currentUserID = currentUser && currentUser.uid;
     const [formData, setFormData] = useState({
         title: "",
         purpose: "for-rent",
@@ -435,6 +437,7 @@ export default function multistep() {
                 rooms: formData.rooms,
                 county: formData.county,
                 constituency: formData.constituency,
+                uid: currentUserID,
                 ward: formData.ward,
                 latitude: formData.latitude,
                 type: "Rental Apartment",
@@ -489,6 +492,11 @@ export default function multistep() {
         }
 
 };
+    useEffect(() => {
+        if(currentUser === null){
+            router.push('/signin')
+        }
+    }, []);
     return (
         <Flex width="100%" flexWrap={"wrap"}>
             {/*Left form*/}

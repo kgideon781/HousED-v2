@@ -42,7 +42,7 @@ const Signin = () => {
                 uid: user.uid,
                 role: "subscriber"
                 //photoUrl: user.photoUrl
-            }).then(r =>{
+            }, {merge: true}).then(r =>{
                 toast({
                     title: `user ${user.displayName} created!`,
                     status: "success",

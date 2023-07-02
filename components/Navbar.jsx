@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import {Avatar, Box, Button, Flex, Icon, Menu, MenuButton, MenuList, Stack, Text} from "@chakra-ui/react";
+import {Avatar, Box, Button, Flex, Icon, IconButton, Menu, MenuButton, MenuList, Stack, Text} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import {auth, db} from "../firebase";
-import {BiChevronDown, BiCog, BiHome, BiLogOut, BiPlus, BiUser} from "react-icons/bi";
+import {BiChevronDown, BiCog, BiHome, BiHotel, BiLogOut, BiPlus, BiSearch, BiUser} from "react-icons/bi";
+import {FaBiking} from "react-icons/fa";
+import {GiOverlordHelm} from "react-icons/gi";
 
 
 const Navbar = (props) => {
@@ -67,6 +69,7 @@ const MenuItem = ({ children, isLast, to = "/", ...rest }) => {
 const MenuLinks = ({ isOpen }) => {
     const [currentUser, setCurrentUser] = useState(null)
     const [role, setRole] = useState('subscriber')
+    const loggedInUser = auth.currentUser;
 
 
     const handleLogout = async () => {
@@ -120,19 +123,14 @@ const MenuLinks = ({ isOpen }) => {
                 <MenuItem to="/search?purpose=for-sale">Buy Property </MenuItem>
                 <MenuItem to="/about-us">About us </MenuItem>
                 <MenuItem to="/search" isLast>
-                    <Button
-                        size="sm"
-                        rounded="md"
-                        color={"white"}
-                        bg={["blue.400", "blue.400", "black.500", "black.500"]}
-                        _hover={{
-                            bg: ["black.100", "black.100", "black.600", "black.600"]
-                        }}
-                    >
-                        Search
-                    </Button>
+
+                    <IconButton
+                        colorScheme='blue'
+                        aria-label='Search database'
+                        icon={<BiSearch />}
+                    />
                 </MenuItem>
-                {currentUser && <Menu>
+                {currentUser ? <Menu>
                     <MenuButton
                         as={Button}
                         rightIcon={<BiChevronDown />}
@@ -162,6 +160,19 @@ const MenuLinks = ({ isOpen }) => {
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiCog} />
                             <MenuItem to={"/settings"}>Settings</MenuItem>
                         </Flex>
+                        {role === 'subscriber' ?  <Flex alignItems={"center"}  p={"2%"} w={"100%"} cursor={"pointer"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={GiOverlordHelm} />
+                            <MenuItem to={"/account-setup"}>I am a Landlord/Agency</MenuItem>
+
+                        </Flex>
+                            :
+                            <Flex alignItems={"center"}  p={"2%"} w={"100%"} cursor={"pointer"}>
+                                <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiHotel} />
+                                <MenuItem to={"/my-profile"}>My Properties</MenuItem>
+
+                            </Flex>
+
+                        }
 
                         <Flex alignItems={"center"} p={"2%"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiLogOut} />
@@ -171,8 +182,24 @@ const MenuLinks = ({ isOpen }) => {
                         </Flex>
 
 
+
                     </MenuList>
-                </Menu>}
+                </Menu>
+                    :
+                    <MenuItem to="/signin">
+                        <Button
+                            size="sm"
+                            rounded="md"
+                            color={"white"}
+                            bg={["blue.400", "blue.400", "black.500", "black.500"]}
+                            _hover={{
+                                bg: ["black.100", "black.100", "black.600", "black.600"]
+                            }}
+                        >
+                            Login
+                        </Button>
+                    </MenuItem>
+                }
 
             </Stack>
         </Box>
