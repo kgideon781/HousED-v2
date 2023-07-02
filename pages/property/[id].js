@@ -12,13 +12,15 @@ import {db} from "../../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {GoogleMap } from "react-google-maps";
 import ImageGallery from "../../components/ImagesGallery";
-import {BiChevronRight, BiEnvelope, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
+import {BiBookmark, BiChevronRight, BiEnvelope, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
+import {PiShareFatFill} from "react-icons/pi";
 
 
 const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID}}/*{ price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID }*/) => {
 
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
+    const [url, setUrl] = useState('');
 
     useEffect(() => {
         const googleMapScript = document.createElement('script');
@@ -33,6 +35,25 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             googleMapScript.removeEventListener('load', initMap);
         };
     }, []);
+
+
+    useEffect(() => {
+        setUrl(window.location.href);
+    }, []);
+
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                url: url,
+            })
+                .then(() => console.log('Shared successfully.'))
+                .catch((error) => console.error('Error sharing:', error));
+        } else {
+            console.warn('Web Share API not supported.');
+            // Handle sharing fallback for unsupported browsers or devices
+        }
+    };
 
     const initMap = () => {
         new window.google.maps.Map(mapContainerRef.current, {
@@ -58,7 +79,15 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             </Flex>
 
                             <Box>
-                                <Avatar size="sm" src={agency?.logo?.url}/>
+                                <Flex>
+                                    {/*Bookmark and share buttons*/}
+                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
+                                        <BiBookmark/>   Bookmark
+                                    </Button>
+                                    <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
+                                        <PiShareFatFill/>   Share
+                                    </Button>
+                                </Flex>
                             </Box>
 
 
@@ -135,13 +164,13 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             <Flex justifyContent={"center"} alignItems={"center"}>
                                 <Stack direction='row' spacing={4}>
                                     <Button leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
-                                        Email
+                                        Call us
                                     </Button>
                                     <Button leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
-                                        Call us
+                                        Email
                                     </Button>
                                     <Button leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid'>
-                                        Call us
+                                        Whatsapp
                                     </Button>
                                 </Stack>
                             </Flex>
