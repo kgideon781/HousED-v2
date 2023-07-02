@@ -11,7 +11,7 @@ import {
     ModalOverlay,
     ModalHeader,
     ModalBody,
-    ModalFooter, ModalContent, Textarea, FormLabel, FormControl, FormHelperText
+    ModalFooter, ModalContent, Textarea, FormLabel, FormControl, FormHelperText, Center, IconButton
 } from '@chakra-ui/react';
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
@@ -19,7 +19,7 @@ import {GoVerified} from "react-icons/go";
 import {MdStarHalf} from "react-icons/md";
 import millify from "millify";
 import defaultImage from '../assets/images/defaultImage.jpg'
-import { BiLike } from "react-icons/bi";
+import {BiCurrentLocation, BiLike} from "react-icons/bi";
 import { IoMdShare } from "react-icons/io";
 import {addLike, countLikes} from "../pages/index";
 
@@ -29,9 +29,12 @@ import React, {useEffect, useState} from "react";
 import {db} from "../firebase";
 import firebase from "firebase";
 import RatingBar from "../utils/ratingsBar";
+import {FiChevronLeft, FiChevronRight} from "react-icons/fi";
+import {ImLocation2} from "react-icons/im";
 
 
-const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area, agency, isVerified, externalID, propertyID, currentUser, timestamp }) => {
+
+const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths, area, agency, isVerified, externalID, propertyID, currentUser, timestamp }) => {
 
     const router = useRouter();
     const [likes, setLikes] = useState(0);
@@ -42,7 +45,8 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
     const [feedback, setFeedback] = useState('');
 
     const [averageRating, setAverageRating] = useState(0);
-
+    const [images, setImages] = useState([]);
+    //console.log(ward)
     const saveRating = async (rating) => {
         try {
             const ratingRef = db.collection("properties").doc(propertyID).collection("ratings").doc(currentUser);
@@ -82,11 +86,6 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
     const closeModal = () => {
         setIsOpen(false);
     };
-    useEffect(() => {
-
-    });
-
-
 
     const saveRatingAndFeedback = () => {
         // Save the rating and feedback to Firestore
@@ -98,6 +97,20 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
     };
 
 
+
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const handleThumbnailClick = (index) => {
+        setCurrentImageIndex(index);
+    };
+
+    const handlePrevImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+    };
+
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+    };
 
 
     useEffect(() => {
@@ -112,22 +125,71 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
             setAverageRating(total / querySnapshot.size);
         });
 
+        //fetch property photos from firestore
+        db.collection("properties").doc(propertyID)
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const propertyData = doc.data();
+                    const propertyPhotos = propertyData.photos;
+                    setImages(propertyPhotos);
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document!");
+                }
+            });
     }, [likesRef]);
+
+
+
 
 
     return (
         <>
-
+            {/*<Box>
+                {timestamp && <Text>Posted {timestamp}</Text>}
+                <Image src={coverPhoto ? coverPhoto : defaultImage} width={400} height={260} alt="Image"/>
+            </Box>
+*/}
 
             <Flex flexWrap="wrap" w="420px" p="5" paddingTop="0" justifyContent="flex-start" cursor="pointer">
-                <Link href={`/property/${propertyID}`} passHref>
-                    <Box>
-                        {/*{timestamp && <Text>Posted {timestamp}</Text>}*/}
-                        <Image src={coverPhoto ? coverPhoto : defaultImage} width={400} height={260} alt="Image"/>
+                {/*<Link href={`/property/${propertyID}`} passHref>*/}
+                <Flex direction="column" alignItems="center" onClick={() => router.push(`/property/${propertyID}`)}>
+                    <Box position="relative" mb={4} height={260} maxHeight={260} width={380} >
+                        <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} minHeight={260} height={260} width={380} boxSize="400px" />
+                        <Center position="absolute" top="50%" left={0} transform="translateY(-50%)">
+                            <IconButton
+                                aria-label="Previous Image"
+                                icon={<FiChevronLeft />}
+                                fontSize={"48px"}
+                                onClick={handlePrevImage}
+                                disabled={currentImageIndex === 0}
+                                bg="blackAlpha.700"
+                                _hover={{ bg: 'blackAlpha.900' }}
+                                _active={{ bg: 'transparent' }}
+                                color="white"
+                            />
+                        </Center>
+                        <Center position="absolute" top="50%" right={0} transform="translateY(-50%)">
+                            <IconButton
+                                aria-label="Next Image"
+                                icon={<FiChevronRight />}
+                                fontSize={"48px"}
+                                onClick={handleNextImage}
+                                disabled={currentImageIndex === images.length - 1}
+                                bg="blackAlpha.700"
+                                _hover={{ bg: 'blackAlpha.900' }}
+                                _active={{ bg: 'transparent' }}
+                                color="white"
+                            />
+                        </Center>
+                        <Box position="absolute" bottom={0} left={0} width="100%" p={2} bg="rgba(0, 0, 0, 0.5)" color="white" textAlign="center">
+                            {currentImageIndex + 1}/{images.length}
+                        </Box>
                     </Box>
-
-                </Link>
-                <Box w="full" border="1px solid #d3eaf2">
+                </Flex>
+                {/*</Link>*/}
+                <Box w="full" border="1px solid #d3eaf2" mt={"-4%"} zIndex={10} bg={"white"}>
 
                         <Flex paddingTop="2" alignItems="center" justifyContent="space-between">
                             <Flex alignItems="center">
@@ -160,9 +222,13 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, title, baths, area
 
                         </Flex>
 
-                        <Text fontSize="lg" paddingBottom="4" paddingLeft="1">
+                        <Text fontSize="lg" paddingBottom="2" paddingLeft="1">
                             {title?.length > 30 ? `${title.substring(0, 40)}...` : title}
                         </Text>
+                    {ward && <Flex p={"1%"} justifyContent={"flex-start"} alignItems={"center"}>
+                        <ImLocation2 size={20}/>
+                        <Text fontSize="sm" fontWeight={"bold"} paddingLeft="1">{ward}</Text>
+                    </Flex>}
 
                     <hr/>
                     <Flex mt="4px" padding="5px" justifyContent="space-between" alignItems="center">

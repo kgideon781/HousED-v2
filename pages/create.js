@@ -13,16 +13,18 @@ import {
     Textarea, Image, IconButton
 } from "@chakra-ui/react";
 import {Form} from "react-router-dom";
-import {db} from "../firebase";
+import {db, storage} from "../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import { useToast } from '@chakra-ui/react';
 import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 import firebase from "firebase";
+import {useRouter} from "next/router";
 
 
 const Form1 = ({ formData, setFormData }) => {
     const [show, setShow] = useState(false);
     const toast = useToast()
+
     const handleClick = () => setShow(!show);
 
 
@@ -105,7 +107,7 @@ const Form1 = ({ formData, setFormData }) => {
             </FormControl>
             <FormControl mt="2%" as={GridItem} colSpan={6}>
                 <FormLabel htmlFor="price" fontWeight={'normal'}>
-                    Listing Agency
+                    Price/Rent
                 </FormLabel>
                 <Input
                     id="price"
@@ -256,7 +258,7 @@ const Form2 = ({ formData, setFormData }) => {
     );
 };
 
-const Form3 = () => {
+const Form3 = ({formData, setFormData}) => {
     return (
         <>
             <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
@@ -283,6 +285,8 @@ const Form3 = () => {
                     size="sm"
                     w="full"
                     rounded="md"
+                    value={formData.county}
+                    onChange={(event) => setFormData({...formData, county: event.target.value})}
                 />
 
             </FormControl>
@@ -309,6 +313,8 @@ const Form3 = () => {
                     size="sm"
                     w="full"
                     rounded="md"
+                    value={formData.constituency}
+                    onChange={(event) => setFormData({...formData, constituency: event.target.value})}
                 />
             </FormControl>
 
@@ -334,7 +340,10 @@ const Form3 = () => {
                     size="sm"
                     w="full"
                     rounded="md"
+                    value={formData.ward}
+                    onChange={(event) => setFormData({...formData, ward: event.target.value})}
                 />
+
             </FormControl>
 
             <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
@@ -359,7 +368,12 @@ const Form3 = () => {
                     size="sm"
                     w="full"
                     rounded="md"
+                    value={formData.latitude}
+                    onChange={(event) => setFormData({...formData, latitude: event.target.value})}
                 />
+                <FormHelperText>
+                    Enter the latitude of the property location
+                </FormHelperText>
             </FormControl>
 
 
@@ -368,20 +382,26 @@ const Form3 = () => {
 };
 
 export default function multistep() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(33.33);
     const [selectedImages, setSelectedImages] = useState([]);
     const toast = useToast()
     const [formData, setFormData] = useState({
         title: "",
-        purpose: "",
-        rentFrequency: "",
+        purpose: "for-rent",
+        rentFrequency: "monthly",
         description: "",
         agency: "",
+        photos: [],
         area: 0,
         rooms: 0,
         baths: 0,
         price: 0,
+        county: "",
+        constituency: "",
+        ward: "",
+        latitude: "",
 
     })
 
@@ -396,41 +416,79 @@ export default function multistep() {
         );
     };
 
-
-    const submitProperty = (e) => {
+    const submitProperty = async (e) => {
         e.preventDefault();
 
-        db.collection("properties").add({
-            title: formData.title,
-            description: formData.description,
-            coverPhoto: "https://bayut-production.s3.eu-central-1.amazonaws.com/image/175202260/3271d492ce4149e18b3aa2eb91f288e5",
-            photos: ["https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/properties%2FoJi6R3Qh8p2rO8HowEiQ?alt=media&token=0a03d865-9e10-48ce-a370-e36023345bfc", "https://bayut-production.s3.eu-central-1.amazonaws.com/image/110799002/8ab6592e4ea7409fb05af756b7b80a03", "https://bayut-production.s3.eu-central-1.amazonaws.com/image/110799000/13c5ddeb3710480ab040480678519575"],
-            price: formData.price,
-            rentFrequency: formData.rentFrequency,
-            purpose: formData.purpose,
-            baths: formData.baths,
-            agency: formData.agency,
-            area: formData.area,
-            isVerified: false,
-            rooms: formData.rooms,
-            type: "Rental Apartment",
-            amenities: ["balcony", "airport nearby", "shopping mall", "grocery market", "stadium", "basketball court", "indoor pool", "Jacuzzi", "helipad"],
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        }).then(r => {
+        try {
+            const propertyData = {
+                title: formData.title,
+                description: formData.description,
+                coverPhoto: "https://bayut-production.s3.eu-central-1.amazonaws.com/image/175202260/3271d492ce4149e18b3aa2eb91f288e5",
+                photos: [],
+                price: formData.price,
+                rentFrequency: formData.rentFrequency,
+                purpose: formData.purpose,
+                baths: formData.baths,
+                agency: formData.agency,
+                area: formData.area,
+                isVerified: false,
+                rooms: formData.rooms,
+                county: formData.county,
+                constituency: formData.constituency,
+                ward: formData.ward,
+                latitude: formData.latitude,
+                type: "Rental Apartment",
+                amenities: ["balcony", "airport nearby", "shopping mall", "grocery market", "stadium", "basketball court", "indoor pool", "Jacuzzi", "helipad"],
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+            // Upload each selected image to Firebase Storage
+            for (const image of selectedImages) {
+                const imageRef = storage.ref().child(`properties/${image.name}`);
+                const uploadTask = imageRef.put(image);
+
+                // Track the upload progress
+                uploadTask.on(
+                    'state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setProgress(progress);
+                    },
+                    (error) => {
+                        // Handle error during upload
+                        console.log('Error uploading image:', error);
+                    }
+                );
+
+                // Wait for the upload to complete and retrieve the download URL
+                await uploadTask;
+
+                // Get the download URL of the uploaded image
+                const downloadURL = await imageRef.getDownloadURL();
+
+                // Add the download URL to the propertyData.photos array
+                propertyData.photos.push(downloadURL);
+            }
+
+            // Add the property data to Firestore
+            const propertyRef = await db.collection('properties').add(propertyData).then(router.push('/'));
             toast({
-                title: `Property with id ${r.id} was posted successfully.`,
-                description: "We've created your account for you.",
+                title: `Property with id ${propertyRef.id} was posted successfully.`,
                 status: 'success',
                 duration: 9000,
                 isClosable: true,
-            })
-        })
-    }
+            });
+        } catch (error) {
+            console.log('Error submitting property:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to submit the property.',
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            });
+        }
 
-    const addImageToDB = (e) => {
-
-    }
-
+};
     return (
         <Flex width="100%" flexWrap={"wrap"}>
             {/*Left form*/}
@@ -450,7 +508,7 @@ export default function multistep() {
                     isAnimated></Progress>
                 {step === 1 ? <Form1 formData={formData} setFormData={setFormData} /> :
                     step === 2 ? <Form2 formData={formData} setFormData={setFormData} /> :
-                        <Form3 />}
+                        <Form3 formData={formData} setFormData={setFormData} />}
                 <ButtonGroup mt="5%" w="100%">
                     <Flex w="100%" justifyContent="space-between">
                         <Flex>

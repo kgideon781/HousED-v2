@@ -2,7 +2,7 @@ import Link from 'next/link';
 import {Avatar, Box, Button, Flex, Icon, Menu, MenuButton, MenuList, Stack, Text} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import {auth, db} from "../firebase";
-import {BiChevronDown, BiCog, BiHome, BiLogOut, BiUser} from "react-icons/bi";
+import {BiChevronDown, BiCog, BiHome, BiLogOut, BiPlus, BiUser} from "react-icons/bi";
 
 
 const Navbar = (props) => {
@@ -83,7 +83,7 @@ const MenuLinks = ({ isOpen }) => {
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
             if (user) {
-                setCurrentUser(user.uid)
+                setCurrentUser(user)
                 //console.log(user.uid)
                 const usersRef = db.collection('users').doc(user.uid)
 
@@ -95,6 +95,7 @@ const MenuLinks = ({ isOpen }) => {
                         setRole('admin')
                     }
                 })
+
             } else {
                 setCurrentUser(null)
             }
@@ -144,20 +145,20 @@ const MenuLinks = ({ isOpen }) => {
                             bg: ["blue.400", "blue.400", "black.500", "black.500"],
                         }}
                     >
-                        <Avatar size="sm" name="John Doe" src="/path/to/avatar.jpg" />
+                        <Avatar size="sm" name={currentUser.displayName} src={"path"} />
                     </MenuButton>
                     <MenuList>
                         {/* Add your user account menu items here */}
-                        <Flex alignItems={"center"} p={"2%"}>
+                        <Flex alignItems={"center"} p={"3%"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiUser} />
                             <MenuItem to={"/my-profile"}>Your Profile</MenuItem>
                         </Flex>
-                        <Flex alignItems={"center"} p={"2%"}>
-                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiHome} />
-                            {role !== 'subscriber' ? <MenuItem to="/my-properties">My Properties</MenuItem> : <MenuItem to="/register-agency">Register Agency</MenuItem>}
+                        {role !== 'subscriber' && <Flex alignItems={"center"} p={"3%"} borderColor={"gray.200"} borderWidth={"1px"}>
+                            <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiPlus} />
+                            <MenuItem to="/create">New Property</MenuItem>
 
-                        </Flex>
-                        <Flex alignItems={"center"} p={"2%"}>
+                        </Flex>}
+                        <Flex alignItems={"center"} p={"3%"} borderColor={"gray.200"} borderWidth={"1px"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiCog} />
                             <MenuItem to={"/settings"}>Settings</MenuItem>
                         </Flex>

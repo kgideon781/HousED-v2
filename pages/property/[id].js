@@ -1,4 +1,4 @@
-import {Box, Flex, Text, Spacer, Avatar, Button} from "@chakra-ui/react";
+import {Box, Flex, Text, Spacer, Avatar, Button, Image, Icon, Stack} from "@chakra-ui/react";
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
 import {GoVerified} from "react-icons/go";
@@ -11,10 +11,13 @@ import React, {useEffect, useRef, useState} from "react";
 import {db} from "../../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {GoogleMap } from "react-google-maps";
+import ImageGallery from "../../components/ImagesGallery";
+import {BiChevronRight, BiEnvelope, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
 
 
 const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID}}/*{ price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID }*/) => {
 
+    const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
 
     useEffect(() => {
@@ -23,6 +26,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
         googleMapScript.async = true;
         window.document.body.appendChild(googleMapScript);
 
+        console.log(photos)
         googleMapScript.addEventListener('load', initMap);
 
         return () => {
@@ -42,7 +46,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             {/*Left side*/}
             <Box w={[ "100%", "70%"]}>
                 <Box maxWidth="1000px" margin="auto" p="4">
-                    {photos && <ImageScrollbar data={photos}/>}
+                    <ImageGallery photos={photos} />
                     <Box w="full" p="6">
                         <Flex paddingTop="2" alignItems="center" justifyContent="space-between">
                             <Flex alignItems="center">
@@ -112,11 +116,40 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             <Box w={["100%", "30%"]}>
                 <Box>
                     <Text fontSize="2xl" fontWeight="black" marginTop="5">Contact Agent</Text>
-                    <Box p="4" bg="gray.100" borderRadius="5">
-                        <Avatar size={"md"} src={jsmastery_logo} alt={"agency logo"} w="100px" h="100px" borderRadius="5" objectFit="cover"/>
-                        <Text fontWeight="bold" fontSize="lg">{agency?.name}</Text>
-                        <Text>{agency?.phone}</Text>
-                    </Box>
+                        <Box p="4" borderWidth={"1px"} borderColor={"gray.400"} borderRadius="5">
+                            <Flex>
+                                <Image width={"80px"} height={"80px"} src={profile_image} placeholder={profile_image} alt={"agency logo"} borderRadius="50%" objectFit="cover"/>
+                                <Box m={"16px"} w={"100%"}>
+                                    {agency.name ? <Text fontWeight="bold" fontSize="lg">{agency.name}</Text> : <Text fontWeight="bold" fontSize="lg">Gide Legacy</Text>}
+                                    <Flex alignItems={"center"} w={"100%"}>
+                                        <Text fontSize={"12px"} fontWeight={"bold"} mr={"5px"}>No reviews</Text>
+                                        <Flex m={"2%"} borderColor={"blue.400"} borderWidth={"1px"} w={"auto"} borderRadius={5} p={"2%"} cursor={"pointer"}>
+                                            <Text fontSize={"12px"} color="blue.400" >Write a review</Text>
+                                            <Icon as={BiChevronRight} color="blue.400" w={5} h={5}/>
+                                        </Flex>
+                                    </Flex>
+                                    <Text>{agency?.phone}</Text>
+                                </Box>
+                            </Flex>
+
+                            <Flex justifyContent={"center"} alignItems={"center"}>
+                                <Stack direction='row' spacing={4}>
+                                    <Button leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
+                                        Email
+                                    </Button>
+                                    <Button leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
+                                        Call us
+                                    </Button>
+                                    <Button leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid'>
+                                        Call us
+                                    </Button>
+                                </Stack>
+                            </Flex>
+                        </Box>
+
+
+                    {/*Contact Section*/}
+
                 </Box>
                 {/*Google map place API*/}
                 <Box>
@@ -155,6 +188,6 @@ export async function getServerSideProps({ params: {id}} ){
 
 //TODO: make contact agent button work and add their details
 //TODO: add related properties
-//TODO: add 
+//TODO: add
 
 export default PropertyDetails;

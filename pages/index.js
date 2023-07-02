@@ -7,7 +7,6 @@ import React, {useState} from "react";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {auth, db} from "../firebase";
 import firebase from "firebase";
-import Navbar from "../components/Navbar";
 
 const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, imageUrl}) => (
     <Flex flexWrap="wrap" justifyContent="center" alignItems="center" m="10">
@@ -47,9 +46,6 @@ function Home(){
     const currentUser = auth.currentUser ? auth.currentUser.uid : null;
 
 
-
-
-
     return (
       <>
           <Box>
@@ -69,6 +65,7 @@ function Home(){
                   {propertiesForRent?.docs.map((property) => (
 
 
+
                       <Property
                           key={property.id}
                           propertyID={property.id}
@@ -83,6 +80,7 @@ function Home(){
                           isVerified={property.data().isVerified}
                           externalID={property.data().externalID}
                           currentUser={currentUser}
+                          ward={property.data().ward}
                           timestamp={property.data().timestamp}
                       />
                   ))}
@@ -118,6 +116,7 @@ function Home(){
                           agency={property.data().agency}
                           isVerified={property.data().isVerified}
                           externalID={property.data().externalID}
+                          ward={property.data().ward}
                           currentUser={currentUser}
                       />
                   ))}

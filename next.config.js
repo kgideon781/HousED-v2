@@ -4,7 +4,9 @@ const nextConfig = {
   images:{
     domains: [
         'bayut-production.s3.eu-central-1.amazonaws.com', 'images.bayut.com',
-        "firebasestorage.googleapis.com"
+        "firebasestorage.googleapis.com",
+        "firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com"
+
     ]
   }
 }
