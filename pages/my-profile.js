@@ -69,7 +69,7 @@ const MyProfile = () => {
                             <Box>
 
                                 <Text fontSize="xl" mb={2} fontWeight={"black"} color={"blue.500"}>
-                                    {currentUser.displayName ? currentUser.displayName : fullName}
+                                    {currentUser?.displayName ? currentUser?.displayName : fullName}
                                 </Text>
                                 <Text fontSize="xl" mb={2} textDecor={"underline"} fontWeight={"thin"}>
                                     Email: {currentUser?.email}
