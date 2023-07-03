@@ -170,7 +170,7 @@ const AccountSetup = () => {
                             </Text>
                         </Heading>
                         <Text color={'gray.500'} fontSize={{ base: 'sm', sm: 'md' }}>
-                            Fill out the form below to join our team of Owners and Agencies. We need the following information to get you started.
+                            Fill out the form below to join our team of Owners and Agencies.
                         </Text>
                     </Stack>
                     <Box as={'form'} mt={10}>
