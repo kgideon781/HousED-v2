@@ -9,8 +9,12 @@ const MyProfile = () => {
     const [agency, setAgency] = useState("");
     const usersRef = db.collection('users');
     const [fullName, setFullName] = useState("No name");
-    const [properties, loading, error] = useCollection(db.collection('properties').where("uid", "==", currentUser?.uid));
     const userRef = usersRef.doc(currentUser?.uid);
+    const query = currentUser
+        ? db.collection('properties').where('uid', '==', currentUser.uid)
+        : null;
+
+    const [properties, loading, error] = useCollection(query);
 
     useEffect(() => {
         userRef.get().then((doc) => {
