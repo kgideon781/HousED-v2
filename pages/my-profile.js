@@ -6,7 +6,7 @@ const MyProfile = () => {
     const currentUser = auth.currentUser;
     const [role, setRole] = React.useState("user");
     const usersRef = db.collection('users');
-    const userRef = usersRef.doc(currentUser.uid);
+    const userRef = usersRef.doc(currentUser?.uid);
 
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const MyProfile = () => {
                 <Box h={"30vh"}>
                     <Flex h={"100%"}>
                         <Box>
-                            <Avatar size="xl" name={currentUser.displayName} src={currentUser.photoURL} />
+                            <Avatar size="xl" name={currentUser?.displayName} src={currentUser.photoURL} />
                         </Box>
                         <Flex h={"100%"} ml={"5%"}>
                             <Box>
