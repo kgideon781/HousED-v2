@@ -212,7 +212,7 @@ const AccountSetup = () => {
                                     </Box>
                                 </HStack>
                                 <Input
-                                    placeholder={currentUser.email}
+                                    placeholder={currentUser?.email}
                                     bg={'gray.100'}
                                     border={0}
                                     color={'gray.500'}
