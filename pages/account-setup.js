@@ -53,7 +53,7 @@ const AccountSetup = () => {
     };
     const avatars = [
         {
-            name: 'Ryan Florence',
+            name: 'Gideon Kiprotich',
             url: 'https://bit.ly/ryan-florence',
         },
         {
