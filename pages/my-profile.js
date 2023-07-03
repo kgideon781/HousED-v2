@@ -40,16 +40,16 @@ const MyProfile = () => {
                 <Box h={"30vh"}>
                     <Flex h={"100%"}>
                         <Box>
-                            <Avatar size="xl" name={currentUser?.displayName} src={currentUser.photoURL} />
+                            <Avatar size="xl" name={currentUser?.displayName} src={currentUser?.photoURL} />
                         </Box>
                         <Flex h={"100%"} ml={"5%"}>
                             <Box>
 
                                 <Text fontSize="xl" mb={2} fontWeight={"black"} color={"blue.500"}>
-                                    {currentUser.displayName}
+                                    {currentUser?.displayName}
                                 </Text>
                                 <Text fontSize="xl" mb={2} textDecor={"underline"} fontWeight={"thin"}>
-                                    Email: {currentUser.email}
+                                    Email: {currentUser?.email}
                                 </Text>
                                 <Text fontSize="xl" mb={2}  fontWeight={"bold"} >
                                     Role: {role}
