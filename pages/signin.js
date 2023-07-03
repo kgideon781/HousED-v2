@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import {auth, db} from "../firebase";
-import firebase from 'firebase/app';
-import {FormControl, Input, Button, Flex, GridItem, Box, useToast} from "@chakra-ui/react";
-import { GoogleLogin } from 'react-google-login';
-import {useRouter} from "next/router";
+import {
+    FormControl,
+    Input,
+    Button,
+    Box,
+    useToast,
+} from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import firebase from "firebase";
 
 const Signin = () => {
     const [email, setEmail] = useState("");
@@ -11,95 +16,55 @@ const Signin = () => {
     const [error, setError] = useState(null);
     const toast = useToast();
     const router = useRouter();
-    //check if user is logged in already and redirect them to the homepage
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            router.push('/');
-        }
-    });
 
-
-    const onSuccess = (response) => {
-        const googleCredential = auth.GoogleAuthProvider.credential(response.tokenId);
-        auth.signInWithCredential(googleCredential).then(r => console.log(`logged in as ${r.user.uid}`));
-    }
-
-    const onFailure = (error) => {
-        console.log(error);
-    }
-
-
-    const handleSignUp = async () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
+    // Function to handle sign-in
+    const handleSignIn = async () => {
         try {
-            const { user } = await auth.signInWithPopup(provider);
-            // Save user data to your database
-            // Redirect to the homepage or another page
-            console.log(user)
-            db.collection("users").doc(user.uid).set({
-                displayName: user.displayName,
-                email: user.email,
-                uid: user.uid,
-                role: "subscriber"
-                //photoUrl: user.photoUrl
-            }, {merge: true}).then(r =>{
-                toast({
-                    title: `user ${user.displayName} created!`,
-                    status: "success",
-                    duration: 9000,
-                    isClosable: true,
-                });
-            })
-
-            await router.push('/');
+            await auth.signInWithEmailAndPassword(email, password);
+            router.push("/");
+        } catch (error) {
+            setError(error.message);
         }
-        catch (error) {
-            console.error(error);
-        }
-        /*auth
-            .createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                toast({
-                    title: "user created!",
-                    status: "success",
-                    duration: 9000,
-                    isClosable: true,
-                });
-            })
-            .catch((error) => {
-                setError(error.message);
-                toast({
-                    title: "An error occurred! User could not be created",
-                    description: error.message,
-                    status: "error",
-                    duration: 9000,
-                    isClosable: true,
-                });
-            });*/
     };
 
-    const handleSignIn = async () => {
-        auth
-            .signInWithEmailAndPassword(email, password)
-            .then(() => {
-                console.log("user signed in!");
-                toast({
-                    title: "Login successful.",
-                    status: "success",
-                    duration: 9000,
-                    isClosable: true,
-                });
-            })
-            .catch((error) => {
-                setError(error.message);
-                toast({
-                    title: "Email or password is incorrect! Please confirm and try again.",
-                    description: error.message,
-                    status: "error",
-                    duration: 9000,
-                    isClosable: true,
+    // Function to handle sign-up
+    const handleSignUp = async () => {
+        try {
+            await auth.createUserWithEmailAndPassword(email, password).then((user) => {
+                    db.collection("users").doc(user.user.uid).set({
+                        email: email,
+                        role: "subscriber",
+                        uid: user.user.uid,
+                        displayName: user.user.displayName,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+                }
+
+            );
+            router.push("/");
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+    // Function to handle sign up with Google
+    const handleGoogleSignUp = async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await auth.signInWithPopup(provider).then((result) => {
+                db.collection("users").doc(result.user.uid).set({
+                    email: result.user.email,
+                    role: "subscriber",
+                    uid: result.user.uid,
+                    photoURL: result.user.photoURL,
+                    displayName: result.user.displayName,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
                 });
             });
+
+            router.push("/");
+        } catch (error) {
+            setError(error.message);
+        }
     };
 
     return (
@@ -110,9 +75,9 @@ const Signin = () => {
             maxWidth={800}
             p={6}
             m="10px auto"
-            as="form">
-
-            <FormControl mr="5%" mt="2%" as={GridItem} colSpan={[6, 3]}>
+            as="form"
+        >
+            <FormControl mr="5%" mt="2%">
                 <Input
                     type="email"
                     placeholder="Email"
@@ -128,22 +93,20 @@ const Signin = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </FormControl>
-            <Flex flexDirection={"column"} >
-                <Button mt="2%" variantColor="teal" onClick={handleSignIn}>
+            <Box display={"flex"} flexDir={"column"}>
+                <Button mt="2%" colorScheme="teal" onClick={handleSignIn}>
                     Sign In
                 </Button>
-                <Button mt="2%" variantColor="teal" onClick={handleSignUp}>
+                <Button mt="2%" colorScheme="teal" onClick={handleSignUp}>
                     Sign Up
                 </Button>
-                <Button
-                    colorScheme={"red"}
-                    clientId="289236507834-2j0hu3sfmckncpdvaduelcdordhur2rb.apps.googleusercontent.com"
-                    onClick={handleSignUp}
-                    mt="2%"
-                >Sign in with Google</Button>
-            </Flex>
+                {/* Remove handleSignUp from the button */}
+                <Button colorScheme="red" mt="2%" onClick={handleGoogleSignUp}>
+                    Sign in with Google
+                </Button>
+                {error && <p>{error}</p>}
+            </Box>
 
-            {error && <p>{error}</p>}
         </Box>
     );
 };

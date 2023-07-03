@@ -160,13 +160,13 @@ const MenuLinks = ({ isOpen }) => {
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiCog} />
                             <MenuItem to={"/settings"}>Settings</MenuItem>
                         </Flex>
-                        {role === 'subscriber' ?  <Flex alignItems={"center"}  p={"2%"} w={"100%"} cursor={"pointer"}>
+                        {role === 'subscriber' || role === null ?  <Flex alignItems={"center"}  p={"3%"} w={"100%"} cursor={"pointer"} borderColor={"gray.200"} borderWidth={"1px"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={GiOverlordHelm} />
                             <MenuItem to={"/account-setup"}>I am a Landlord/Agency</MenuItem>
 
                         </Flex>
                             :
-                            <Flex alignItems={"center"}  p={"2%"} w={"100%"} cursor={"pointer"}>
+                            <Flex alignItems={"center"}  p={"3%"} w={"100%"} cursor={"pointer"} borderColor={"gray.200"} borderWidth={"1px"}>
                                 <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiHotel} />
                                 <MenuItem to={"/my-profile"}>My Properties</MenuItem>
 
