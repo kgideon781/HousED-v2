@@ -154,7 +154,7 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths,
 
             <Flex flexWrap="wrap" w="420px" p="5" paddingTop="0" justifyContent="flex-start" cursor="pointer">
                 {/*<Link href={`/property/${propertyID}`} passHref>*/}
-                <Flex direction="column" alignItems="center" onClick={() => router.push(`/property/${propertyID}`)}>
+                <Flex direction="column" alignItems="center">
                     <Box position="relative" mb={4} height={260} maxHeight={260} width={380} >
                         <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} minHeight={260} height={260} width={380} boxSize="400px" />
                         <Center position="absolute" top="50%" left={0} transform="translateY(-50%)">
@@ -267,7 +267,7 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths,
 
                         </Box>
                         <Box>
-                            <Button colorScheme='blue' size="md">Contact Agent</Button>
+                            <Button colorScheme='blue' size="md" onClick={() => router.push(`/property/${propertyID}`)}>More details</Button>
                         </Box>
 
                     </Flex>

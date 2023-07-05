@@ -159,17 +159,6 @@ const Form2 = ({ formData, setFormData }) => {
                 </Select>
             </FormControl>
 
-            <FormControl mt="2%" as={GridItem} colSpan={6}>
-                <FormLabel htmlFor="listing-agency" fontWeight={'normal'}>
-                    Listing Agency
-                </FormLabel>
-                <Input
-                    id="listing-agency"
-                    placeholder="Agency/Landlord/Caretaker name..."
-                    value={formData.age}
-                    onChange={(event) => setFormData({...formData, agency: event.target.value})}
-                />
-            </FormControl>
 
             <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
                 <FormLabel
@@ -266,20 +255,20 @@ const Form3 = ({formData, setFormData}) => {
             </Heading>
             <FormControl as={GridItem} colSpan={[6, 3]}>
                 <FormLabel
-                    htmlFor="county"
+                    htmlFor="town"
                     fontSize="sm"
                     fontWeight="md"
                     color="gray.700"
                     _dark={{
                         color: 'gray.50',
                     }}>
-                    County
+                    Town
                 </FormLabel>
                 <Input
                     type="text"
-                    name="county"
-                    id="county"
-                    autoComplete="county"
+                    name="town"
+                    id="town"
+                    autoComplete="town"
                     focusBorderColor="brand.400"
                     shadow="sm"
                     size="sm"
@@ -320,7 +309,7 @@ const Form3 = ({formData, setFormData}) => {
 
             <FormControl as={GridItem} colSpan={[6, 6, null, 2]}>
                 <FormLabel
-                    htmlFor="ward"
+                    htmlFor="ward/estate"
                     fontSize="sm"
                     fontWeight="md"
                     color="gray.700"
@@ -328,7 +317,7 @@ const Form3 = ({formData, setFormData}) => {
                         color: 'gray.50',
                     }}
                     mt="2%">
-                    Ward
+                    Ward/ Estate
                 </FormLabel>
                 <Input
                     type="text"
@@ -372,7 +361,7 @@ const Form3 = ({formData, setFormData}) => {
                     onChange={(event) => setFormData({...formData, latitude: event.target.value})}
                 />
                 <FormHelperText>
-                    Enter the latitude of the property location
+                    Enter the latitude of the property location. For geolocation
                 </FormHelperText>
             </FormControl>
 
@@ -394,7 +383,6 @@ export default function multistep() {
         purpose: "for-rent",
         rentFrequency: "monthly",
         description: "",
-        agency: "",
         photos: [],
         area: 0,
         rooms: 0,
@@ -431,7 +419,6 @@ export default function multistep() {
                 rentFrequency: formData.rentFrequency,
                 purpose: formData.purpose,
                 baths: formData.baths,
-                agency: formData.agency,
                 area: formData.area,
                 isVerified: false,
                 rooms: formData.rooms,
@@ -503,10 +490,10 @@ export default function multistep() {
             <Box
                 borderWidth="1px"
                 rounded="lg"
-                shadow="1px 1px 3px rgba(0,0,0,0.3)"
-                maxWidth={800}
+                borderColor="gray.200"
+                width={"55%"}
                 p={6}
-                m="10px auto"
+                m="10px 2px"
                 as="form">
                 <Progress
                     hasStripe
@@ -563,15 +550,14 @@ export default function multistep() {
                     </Flex>
                 </ButtonGroup>
             </Box>
-            {/*Right form*/}
+            {/*Left form*/}
             {/*multiple image picker*/}
             <Box
                 borderWidth="1px"
                 rounded="lg"
-                shadow="1px 1px 3px rgba(0,0,0,0.3)"
-                maxWidth={800}
+                width={"35%"}
                 p={6}
-                m="10px auto"
+                m="10px 2px"
                 as="form">
                 <Text fontSize="xl" fontWeight="bold" mb="5%">
                     Upload Images
