@@ -53,7 +53,6 @@ function Home(){
 
     return (
       <>
-
           <Box>
               <Banner
                   purpose="RENT A HOME"
@@ -67,10 +66,7 @@ function Home(){
               />
               <Skeleton isLoaded={!loadingForRent}>
               <Flex flexWrap="wrap">
-                  {/* Fetching Data from the database */}
                   {propertiesForRent?.docs.map((property) => (
-
-
                       <Property
                           key={property.id}
                           propertyID={property.id}
@@ -106,7 +102,7 @@ function Home(){
               />
 
 
-              {loadingForSale ? <Spinner size={"2xl"}/> :<Flex flexWrap="wrap">
+              <Flex flexWrap="wrap">
 
                   {propertiesForSale?.docs.map((property) => (
 
@@ -129,8 +125,7 @@ function Home(){
                           timestamp={property.data().timestamp}
                       />
                   ))}
-              </Flex>}
-
+              </Flex>
           </Box>
 
       </>
