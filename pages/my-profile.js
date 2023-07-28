@@ -37,8 +37,8 @@ const MyProfile = () => {
         usersRef.doc(currentUser?.uid).get().then((doc) => {
             if (doc.exists) {
                 // console.log("Document data:", doc.data());
-                setFullName(doc.data().name + " " + doc.data().lastName);
-                return doc.data().name + " " + doc.data().lastName
+                setFullName(doc.data().displayName);
+                return doc.data().displayName;
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -63,13 +63,13 @@ const MyProfile = () => {
                 <Box h={"30vh"}>
                     <Flex h={"100%"}>
                         <Box>
-                            <Avatar size="xl" name={currentUser?.displayName} src={currentUser?.photoURL} />
+                            <Avatar size="xl" name={fullName} src={fullName && fullName} />
                         </Box>
                         <Flex h={"100%"} ml={"5%"}>
                             <Box>
 
                                 <Text fontSize="xl" mb={2} fontWeight={"black"} color={"blue.500"}>
-                                    {currentUser?.displayName ? currentUser?.displayName : fullName}
+                                    {fullName ? fullName : 'No name'}
                                 </Text>
                                 <Text fontSize="xl" mb={2} textDecor={"underline"} fontWeight={"thin"}>
                                     Email: {currentUser?.email}

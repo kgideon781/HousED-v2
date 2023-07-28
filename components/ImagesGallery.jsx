@@ -27,8 +27,8 @@ const ImageGallery = (photos) => {
 
     return (
         <Flex direction="column" alignItems="center">
-            <Box position="relative" mb={4} height={400}>
-                <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} width={"100%"} boxSize={"100%"}/>
+            <Box position="relative" mb={4} height={400} w={"100%"}>
+                <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} width={"100%"} boxSize={"100%"} objectFit={"cover"}/>
                 <Center position="absolute" top="50%" left={0} transform="translateY(-50%)">
                     <IconButton
                         aria-label="Previous Image"

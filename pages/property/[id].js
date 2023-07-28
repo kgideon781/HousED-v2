@@ -12,15 +12,34 @@ import {db} from "../../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {GoogleMap } from "react-google-maps";
 import ImageGallery from "../../components/ImagesGallery";
-import {BiBookmark, BiChevronRight, BiEnvelope, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
+import {BiBookmark, BiChevronRight, BiEnvelope, BiFlag, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
 import {PiShareFatFill} from "react-icons/pi";
 
 
-const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID}}/*{ price,rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID }*/) => {
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID, timestamp}}) => {
 
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
+    //console.log(timestamp)
+
+    // Format the date as a string in the desired format.
+
+    const date = new Date(timestamp.seconds * 1000); // Multiply by 1000 to convert seconds to milliseconds
+
+    const day = date.getDate();
+    const month = date.getMonth(); // Note: Month is zero-indexed (0-11)
+    const year = date.getFullYear();
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"
+    ];
+    const formattedMonth = monthNames[month];
+
+    const formattedDate = `${day} ${formattedMonth} ${year}`;
+
+
 
     useEffect(() => {
         const googleMapScript = document.createElement('script');
@@ -28,7 +47,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
         googleMapScript.async = true;
         window.document.body.appendChild(googleMapScript);
 
-        console.log(photos)
         googleMapScript.addEventListener('load', initMap);
 
         return () => {
@@ -74,8 +92,10 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                                 <Box paddingRight="3" color="green.400">
                                     {isVerified && <GoVerified/>}
                                 </Box>
-                                <Text fontWeight="bold"
-                                      fontSize="lg">KES {millify(price)}{rentFrequency && `/${rentFrequency}`}</Text>
+                               <Flex alignItems={"center"}>
+                                   <Text fontWeight="bold" fontSize="lg" mr={1}>KES </Text><Text fontWeight="bold" fontSize="3xl">{` ${new Intl.NumberFormat().format(price)}`}</Text><Text fontWeight="bold" fontSize="lg" ml={1}>{rentFrequency && ` ${rentFrequency}`}</Text>
+                               </Flex>
+
                             </Flex>
 
                             <Box>
@@ -103,8 +123,12 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                         </Box>
                         <Flex flexWrap='wrap' textTransform='uppercase' justifyContent='space-between'>
                             <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
-                                <Text>Type</Text>
-                                <Text fontWeight="bold">{type}</Text>
+                                <Flex flex={1}>
+                                    <Text>Type</Text>
+                                </Flex>
+                                <Flex flex={1}>
+                                    <Text fontWeight="bold">{type}</Text>
+                                </Flex>
                             </Flex>
                             <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
                                 <Text>Purpose</Text>
@@ -113,10 +137,24 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             {furnishingStatus && (
                                 <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100"
                                       p="3">
-                                    <Text>Furnishing Status</Text>
-                                    <Text fontWeight="bold">{furnishingStatus}</Text>
+                                    <Flex flex={1}>
+                                        <Text>Furnishing Status</Text>
+                                    </Flex>
+                                    <Flex flex={1}>
+                                        <Text fontWeight="bold">{furnishingStatus}</Text>
+                                    </Flex>
                                 </Flex>
                             )}
+                            <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
+                                <Flex flex={1}>
+                                    <Text>Added on:</Text>
+                                </Flex>
+
+                                <Flex justifyContent={"left"}  flex={1}>
+                                    <Text fontWeight="bold">{formattedDate}</Text>
+                                </Flex>
+
+                            </Flex>
                         </Flex>
                     </Box>
                     <Box>
@@ -144,7 +182,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             {/*Right side*/}
             <Box w={["100%", "30%"]}>
                 <Box>
-                    <Text fontSize="2xl" fontWeight="black" marginTop="5">Contact Agent</Text>
+                    <Text fontSize="xl" fontWeight="black" marginTop="5">Contact Agent</Text>
                         <Box p="4" borderWidth={"1px"} borderColor={"gray.400"} borderRadius="5">
                             <Flex>
                                 <Image width={"80px"} height={"80px"} src={profile_image} placeholder={profile_image} alt={"agency logo"} borderRadius="50%" objectFit="cover"/>
@@ -182,7 +220,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                 </Box>
                 {/*Google map place API*/}
                 <Box>
-                    <Text fontSize="2xl" fontWeight="black" marginTop="5">Location</Text>
+                    <Text fontSize="xl" fontWeight="black" marginTop="5">Location</Text>
                     <Box p="4" bg="gray.100" borderRadius="5">
                         <Text fontWeight="bold" fontSize="lg">{agency?.name}</Text>
                         <Text>{agency?.phone}</Text>
@@ -191,8 +229,10 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
 
                     </Box>
                 </Box>
-                <Box p={"1%"} w={"100%"}>
-                    <Button colorScheme="blue" marginTop="2">Contact Agent</Button>
+                <Box p={"1%"} w={"100%"} mt={"5%"}>
+                    <Button w={"100%"} leftIcon={<BiFlag/>} colorScheme='blue' variant='outline'>
+                        Report this property
+                    </Button>
                 </Box>
 
             </Box>

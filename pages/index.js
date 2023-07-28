@@ -118,13 +118,13 @@ function Home(){
                           externalID={property.data().externalID}
                           ward={property.data().ward}
                           currentUser={currentUser}
+                          timestamp={property.data().timestamp}
                       />
                   ))}
 
               </Flex>
           </Box>
 
-          {/*TODO: Add sliding images to the homepage in every property*/}
       </>
 
   )

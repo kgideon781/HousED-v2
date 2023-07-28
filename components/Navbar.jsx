@@ -69,6 +69,9 @@ const MenuItem = ({ children, isLast, to = "/", ...rest }) => {
 const MenuLinks = ({ isOpen }) => {
     const [currentUser, setCurrentUser] = useState(null)
     const [role, setRole] = useState('subscriber')
+    const [fullName, setFullName] = useState('')
+    const usersRef = db.collection('users');
+
     const loggedInUser = auth.currentUser;
 
 
@@ -82,6 +85,21 @@ const MenuLinks = ({ isOpen }) => {
         }
     };
 
+    useEffect(() => {
+        usersRef.doc(loggedInUser?.uid).get().then((doc) => {
+            if (doc.exists) {
+                // console.log("Document data:", doc.data());
+                setFullName(doc.data().displayName);
+                return doc.data().displayName;
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                return "No name";
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    }, [ currentUser]);
 
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
@@ -104,6 +122,7 @@ const MenuLinks = ({ isOpen }) => {
             }
         })
     }, [currentUser])
+    //console.log(role)
     return (
         <Box
             display={{ base: isOpen ? "block" : "none", md: "block" }}
@@ -143,7 +162,7 @@ const MenuLinks = ({ isOpen }) => {
                             bg: ["blue.400", "blue.400", "black.500", "black.500"],
                         }}
                     >
-                        <Avatar size="sm" name={currentUser.displayName} src={"path"} />
+                        <Avatar size="sm" name={fullName ? fullName : currentUser.displayName} src={fullName ? fullName : currentUser.displayName} />
                     </MenuButton>
                     <MenuList>
                         {/* Add your user account menu items here */}
@@ -151,7 +170,7 @@ const MenuLinks = ({ isOpen }) => {
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiUser} />
                             <MenuItem to={"/my-profile"}>Your Profile</MenuItem>
                         </Flex>
-                        {role !== 'subscriber' && <Flex alignItems={"center"} p={"3%"} borderColor={"gray.200"} borderWidth={"1px"}>
+                        {role !== 'subscriber' && role !== null && <Flex alignItems={"center"} p={"3%"} borderColor={"gray.200"} borderWidth={"1px"}>
                             <Icon fontSize={"lg"} ml={"2%"} mr={"2%"} as={BiPlus} />
                             <MenuItem to="/create">New Property</MenuItem>
 

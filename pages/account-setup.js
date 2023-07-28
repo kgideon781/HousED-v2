@@ -31,12 +31,33 @@ const AccountSetup = () => {
 
         // Save the user data to Firestore
         await db.collection('users').doc(currentUser.uid).set({
+            displayName: name + ' ' + lastName,
             name,
             lastName,
             position,
             role: "admin",
-            agency: position === 'agency' ? { name: agencyName, location, phone, email } : null,
-        }).then(() => {
+        }, {merge: true}).then(() => {
+            if (position === 'agency'){
+                db.collection('agencies').add({
+                    name: agencyName,
+                    location,
+                    phone,
+                    email,
+                    position,
+                    agent: currentUser.uid,
+                })
+            }
+            else {
+                db.collection('agencies').add({
+                    name,
+                    lastName,
+                    phone,
+                    email,
+                    position,
+                    agent: currentUser.uid,
+                })
+            }
+
             console.log("Document successfully written!");
         }).catch((error) => {
             console.error("Error writing document: ", error);
@@ -241,6 +262,62 @@ const AccountSetup = () => {
                                             onChange={(e) => setAgencyName(e.target.value)}
                                             required
                                         />
+                                        <Input
+                                            placeholder="Location"
+                                            bg={'gray.100'}
+                                            border={0}
+                                            color={'gray.500'}
+                                            _placeholder={{
+                                                color: 'gray.500',
+                                            }}
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            required
+                                        />
+                                        <Input
+                                            placeholder="+254712345678"
+                                            bg={'gray.100'}
+                                            border={0}
+                                            color={'gray.500'}
+                                            _placeholder={{
+                                                color: 'gray.500',
+                                            }}
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            required
+                                        />
+                                    </>
+                                )}
+                                {position === 'landlord' && (
+                                    <>
+                                        <Input
+                                            placeholder="Location"
+                                            bg={'gray.100'}
+                                            border={0}
+                                            color={'gray.500'}
+                                            _placeholder={{
+                                                color: 'gray.500',
+                                            }}
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            required
+                                        />
+                                        <Input
+                                            placeholder="+254712345678"
+                                            bg={'gray.100'}
+                                            border={0}
+                                            color={'gray.500'}
+                                            _placeholder={{
+                                                color: 'gray.500',
+                                            }}
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            required
+                                        />
+                                    </>
+                                )}
+                                {position === 'caretaker' && (
+                                    <>
                                         <Input
                                             placeholder="Location"
                                             bg={'gray.100'}
