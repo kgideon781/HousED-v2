@@ -57,7 +57,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
 
     useEffect(() => {
         setUrl(window.location.href);
-        window.alert("version 1.0.0")
     }, []);
 
     const handleShare = () => {
@@ -132,8 +131,12 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                                 </Flex>
                             </Flex>
                             <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100" p="3">
-                                <Text>Purpose</Text>
-                                <Text fontWeight="bold">{purpose}</Text>
+                                <Flex flex={1}>
+                                    <Text>Purpose</Text>
+                                </Flex>
+                                <Flex flex={1}>
+                                    <Text fontWeight="bold">{purpose}</Text>
+                                </Flex>
                             </Flex>
                             {furnishingStatus && (
                                 <Flex justifyContent="space-between" w="400px" borderBottom="1px" borderColor="gray.100"
