@@ -48,13 +48,11 @@ function Home(){
             <Spinner size={"xl"}/>
         </Box>
     );
-    const ErrorMessage = () => <h1>Error...</h1>;
+    const ErrorMessage = () => window.alert("Error fetching data");
 
 
     return (
       <>
-          {(loadingForSale || loadingForRent) && <LoadingWithSkeleton />}
-          {errorForSale || errorForRent && <ErrorMessage />}
 
           <Box>
               <Banner
