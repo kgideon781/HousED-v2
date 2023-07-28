@@ -57,6 +57,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
 
     useEffect(() => {
         setUrl(window.location.href);
+        window.alert("version 1.0.0")
     }, []);
 
     const handleShare = () => {
