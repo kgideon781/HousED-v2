@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {Flex, Box, Text, Button,} from '@chakra-ui/react';
+import {Flex, Box, Text, Button, Spinner, Skeleton,} from '@chakra-ui/react';
 import Property from '../components/Property'
 import React from "react";
 import {useCollection} from "react-firebase-hooks/firestore";
@@ -31,21 +31,31 @@ export const addLike = (propertyID) => {
 }
 
 function Home(){
-    //const [properties] = useCollection(db.collection("properties"))
-    const [propertiesForRent] = useCollection(
+    //const [properties, loading: sa] = useCollection(db.collection("properties"))
+    const [propertiesForRent, loadingForRent, errorForRent] = useCollection(
         db.collection("properties")
             .where("purpose", "==", "for-rent")
     )
-    const [propertiesForSale] = useCollection(
+    const [propertiesForSale, loadingForSale, errorForSale] = useCollection(
         db.collection("properties")
             .where("purpose", "==", "for-sale")
     )
 
     const currentUser = auth.currentUser ? auth.currentUser.uid : null;
 
+    const LoadingWithSkeleton = () => (
+        <Box padding='6' boxShadow='lg' bg='white'>
+            <Spinner size={"xl"}/>
+        </Box>
+    );
+    const ErrorMessage = () => <h1>Error...</h1>;
+
 
     return (
       <>
+          {(loadingForSale || loadingForRent) && <LoadingWithSkeleton />}
+          {errorForSale || errorForRent && <ErrorMessage />}
+
           <Box>
               <Banner
                   purpose="RENT A HOME"
@@ -57,11 +67,10 @@ function Home(){
                   linkName="/search?purpose=for-rent"
                   imageUrl="https://images.bayut.com/thumbnails/296195424-800x600.webp"
               />
+              <Skeleton isLoaded={!loadingForRent}>
               <Flex flexWrap="wrap">
-                  {/* Fetching Data from the database
-                  {propertiesForRent.map((property) => <Property property={property} key={property.id}/>)}*/}
+                  {/* Fetching Data from the database */}
                   {propertiesForRent?.docs.map((property) => (
-
 
 
                       <Property
@@ -84,6 +93,8 @@ function Home(){
                   ))}
 
               </Flex>
+              </Skeleton>
+
 
               <Banner
                   purpose="Buy A HOME"
@@ -96,7 +107,8 @@ function Home(){
                   imageUrl="https://images.bayut.com/thumbnails/294251565-800x600.webp"
               />
 
-              <Flex flexWrap="wrap">
+
+              {loadingForSale ? <Spinner size={"2xl"}/> :<Flex flexWrap="wrap">
 
                   {propertiesForSale?.docs.map((property) => (
 
@@ -119,8 +131,8 @@ function Home(){
                           timestamp={property.data().timestamp}
                       />
                   ))}
+              </Flex>}
 
-              </Flex>
           </Box>
 
       </>
