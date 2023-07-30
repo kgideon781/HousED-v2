@@ -16,10 +16,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
-    const [isMobileScreen, isDisplayingInBrowser] = useMediaQuery([
-        '(min-width: 480px)',
-        '(display-mode: browser)',
-    ])
 
     // Format the date as a string in the desired format.
 
@@ -97,9 +93,9 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             </Flex>
 
                             <Box flex={1} display={"flex"} justifyContent={"flex-end"}>
-                                <Flex display={["none", "block"]}>
+                                <Flex>
                                     {/*Bookmark and share buttons*/}
-                                    <Flex>
+                                    <Flex display={["none", "block"]}>
                                         <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
                                             <BiBookmark/>   Bookmark
                                         </Button>
