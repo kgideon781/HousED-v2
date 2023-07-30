@@ -81,10 +81,10 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             <Box w={[ "100%", "70%"]}>
                 <Box maxWidth="1000px" margin="auto" p="4">
                     <ImageGallery photos={photos} />
-                    <Box w="full" p="2">
+                    <Box w="full" p="1">
                         <Flex paddingTop="2" alignItems="center" justifyContent="space-between" flexWrap={"wrap"}>
                             <Flex alignItems="center">
-                                <Box paddingRight="3" color="green.400">
+                                <Box paddingRight="2" color="green.400">
                                     {isVerified && <GoVerified/>}
                                 </Box>
                                <Flex alignItems={"center"}>
@@ -96,7 +96,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             <Box>
                                 <Flex flexWrap={"wrap"}>
                                     {/*Bookmark and share buttons*/}
-                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
+                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="1">
                                         <BiBookmark/>   Bookmark
                                     </Button>
                                     <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
