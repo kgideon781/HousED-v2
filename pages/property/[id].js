@@ -83,7 +83,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                     <ImageGallery photos={photos} />
                     <Box w="full" p="1">
                         <Flex paddingTop="2" alignItems="center" justifyContent="space-between" flexWrap={"wrap"}>
-                            <Flex alignItems="center">
+                            <Flex flex={1} alignItems="center">
                                 <Box paddingRight="2" color="green.400">
                                     {isVerified && <GoVerified/>}
                                 </Box>
@@ -93,10 +93,10 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
 
                             </Flex>
 
-                            <Box>
-                                <Flex flexWrap={"wrap"}>
+                            <Box flex={1} display={"flex"} justifyContent={"flex-end"}>
+                                <Flex>
                                     {/*Bookmark and share buttons*/}
-                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="1">
+                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
                                         <BiBookmark/>   Bookmark
                                     </Button>
                                     <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
