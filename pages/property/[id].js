@@ -88,7 +88,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                                     {isVerified && <GoVerified/>}
                                 </Box>
                                <Flex alignItems={"center"}>
-                                   <Text fontWeight="bold" fontSize="lg" mr={1}>KES </Text><Text fontWeight="bold" fontSize="3xl">{` ${new Intl.NumberFormat().format(price)}`}</Text><Text fontWeight="bold" fontSize="lg" ml={1}>{rentFrequency && ` ${rentFrequency}`}</Text>
+                                   <Text fontWeight="bold" fontSize="lg" mr={1}>KES </Text><Text fontWeight="bold" fontSize="2xl">{` ${new Intl.NumberFormat().format(price)}`}</Text><Text fontWeight="bold" fontSize="lg" ml={1}>{rentFrequency && ` ${rentFrequency}`}</Text>
                                </Flex>
 
                             </Flex>
