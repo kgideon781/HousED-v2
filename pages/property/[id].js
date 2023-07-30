@@ -1,22 +1,17 @@
-import {Box, Flex, Text, Spacer, Avatar, Button, Image, Icon, Stack} from "@chakra-ui/react";
+import {Box, Flex, Text, Button, Image, Icon, Stack} from "@chakra-ui/react";
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
 import {GoVerified} from "react-icons/go";
 import millify from "millify";
-import {baseUrl, fetchApi} from "../../utils/fetchApi";
-import ImageScrollbar from "../../components/ImageScrollbar";
-import jsmastery_logo from "../../assets/images/jsmastery_logo.jpg";
 
 import React, {useEffect, useRef, useState} from "react";
 import {db} from "../../firebase";
-import {useCollection} from "react-firebase-hooks/firestore";
-import {GoogleMap } from "react-google-maps";
 import ImageGallery from "../../components/ImagesGallery";
 import {BiBookmark, BiChevronRight, BiEnvelope, BiFlag, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
 import {PiShareFatFill} from "react-icons/pi";
 
 
-const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, propertyID, timestamp}}) => {
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp}}) => {
 
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
@@ -86,8 +81,8 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
             <Box w={[ "100%", "70%"]}>
                 <Box maxWidth="1000px" margin="auto" p="4">
                     <ImageGallery photos={photos} />
-                    <Box w="full" p="6">
-                        <Flex paddingTop="2" alignItems="center" justifyContent="space-between">
+                    <Box w="full" p="2">
+                        <Flex paddingTop="2" alignItems="center" justifyContent="space-between" flexWrap={"wrap"}>
                             <Flex alignItems="center">
                                 <Box paddingRight="3" color="green.400">
                                     {isVerified && <GoVerified/>}
@@ -99,7 +94,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             </Flex>
 
                             <Box>
-                                <Flex>
+                                <Flex flexWrap={"wrap"}>
                                     {/*Bookmark and share buttons*/}
                                     <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
                                         <BiBookmark/>   Bookmark
@@ -109,8 +104,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                                     </Button>
                                 </Flex>
                             </Box>
-
-
                         </Flex>
                         <Flex alignItems="center" p="1" justifyContent="space-between" w="250px" color="blue.400">
                             {rooms} <FaBed/> |{baths} <FaBath/> {millify(area)} sqft <BsGridFill/>
