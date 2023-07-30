@@ -1,4 +1,4 @@
-import {Box, Flex, Text, Button, Image, Icon, Stack} from "@chakra-ui/react";
+import {Box, Flex, Text, Button, Image, Icon, Stack, useMediaQuery} from "@chakra-ui/react";
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
 import {GoVerified} from "react-icons/go";
@@ -16,7 +16,10 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
-    //console.log(timestamp)
+    const [isMobileScreen, isDisplayingInBrowser] = useMediaQuery([
+        '(min-width: 480px)',
+        '(display-mode: browser)',
+    ])
 
     // Format the date as a string in the desired format.
 
@@ -94,14 +97,28 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                             </Flex>
 
                             <Box flex={1} display={"flex"} justifyContent={"flex-end"}>
-                                <Flex>
+                                <Flex display={["none", "block"]}>
                                     {/*Bookmark and share buttons*/}
-                                    <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
-                                        <BiBookmark/>   Bookmark
-                                    </Button>
-                                    <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
-                                        <PiShareFatFill/>   Share
-                                    </Button>
+                                    <Flex>
+                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
+                                            <BiBookmark/>   Bookmark
+                                        </Button>
+                                        <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
+                                            <PiShareFatFill/>   Share
+                                        </Button>
+                                    </Flex>
+
+
+
+                                    <Flex display={["block", "none"]}>
+                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
+                                            <BiBookmark/>
+                                        </Button>
+                                        <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
+                                        <PiShareFatFill/>
+                                        </Button>
+                                    </Flex>
+
                                 </Flex>
                             </Box>
                         </Flex>
