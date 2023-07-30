@@ -11,11 +11,24 @@ import {BiBookmark, BiChevronRight, BiEnvelope, BiFlag, BiLogoWhatsapp, BiPhoneC
 import {PiShareFatFill} from "react-icons/pi";
 
 
-const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp}}) => {
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, ward, county, title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp, propertyID}}) => {
 
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
+
+    useEffect(() => {
+        db.collection("agencies").doc(propertyID).get().then((doc) => {
+            if (doc.exists) {
+                console.log("Document data:", doc.data());
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    }, []);
 
     // Format the date as a string in the desired format.
 
@@ -82,15 +95,20 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area,  t
                     <ImageGallery photos={photos} />
                     <Box w="full" p="1">
                         <Flex paddingTop="2" alignItems="center" justifyContent="space-between" flexWrap={"wrap"}>
-                            <Flex flex={1} alignItems="center">
-                                <Box paddingRight="2" color="green.400">
-                                    {isVerified && <GoVerified/>}
-                                </Box>
-                               <Flex alignItems={"center"}>
-                                   <Text fontWeight="bold" fontSize="lg" mr={1}>KES </Text><Text fontWeight="bold" fontSize="2xl">{` ${new Intl.NumberFormat().format(price)}`}</Text><Text fontWeight="bold" fontSize="lg" ml={1}>{rentFrequency && ` ${rentFrequency}`}</Text>
-                               </Flex>
+                            <Box pb={"1%"}>
+                                <Flex flex={1} alignItems="center">
+                                    <Box paddingRight="2" color="green.400">
+                                        {isVerified && <GoVerified/>}
+                                    </Box>
+                                   <Flex alignItems={"center"}>
+                                       <Text fontWeight="bold" fontSize="lg" mr={1}>KES </Text><Text fontWeight="bold" fontSize="3xl">{` ${new Intl.NumberFormat().format(price)}`}</Text><Text fontWeight="bold" fontSize="lg" ml={1}>{rentFrequency && ` ${rentFrequency}`}</Text>
+                                   </Flex>
 
-                            </Flex>
+                                </Flex>
+                                <Flex>
+                                    <Text fontSize="sm" color="gray.600">{`${ward}, ${county}`} </Text>
+                                </Flex>
+                            </Box>
 
                             <Box flex={1} display={"flex"} justifyContent={"flex-end"}>
                                 <Flex>

@@ -161,11 +161,11 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths,
                             <IconButton
                                 aria-label="Previous Image"
                                 icon={<FiChevronLeft />}
-                                fontSize={"48px"}
+                                fontSize={"25px"}
                                 onClick={handlePrevImage}
                                 disabled={currentImageIndex === 0}
-                                bg="blackAlpha.700"
-                                _hover={{ bg: 'blackAlpha.900' }}
+                                bg="blackAlpha.500"
+                                _hover={{ bg: 'blackAlpha.600' }}
                                 _active={{ bg: 'transparent' }}
                                 color="white"
                             />
@@ -174,11 +174,11 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths,
                             <IconButton
                                 aria-label="Next Image"
                                 icon={<FiChevronRight />}
-                                fontSize={"48px"}
+                                fontSize={"25px"}
                                 onClick={handleNextImage}
                                 disabled={currentImageIndex === images.length - 1}
-                                bg="blackAlpha.700"
-                                _hover={{ bg: 'blackAlpha.900' }}
+                                bg="blackAlpha.500"
+                                _hover={{ bg: 'blackAlpha.600' }}
                                 _active={{ bg: 'transparent' }}
                                 color="white"
                             />
