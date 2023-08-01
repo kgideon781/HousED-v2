@@ -171,7 +171,7 @@ function Search (){
                 <Icon paddingLeft="2" w="7" as={BsFilter}></Icon>
             </Flex>
 
-            {searchFilters && <SearchFilters/>}
+            {searchFilters && <SearchFilters borderRadius={0} backgroundColor={"grey.300"}/>}
             <Text fontSize="2xl" p="4" fontWeight="bold">
                 Properties {router.query.purpose}
 

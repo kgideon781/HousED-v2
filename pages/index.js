@@ -6,6 +6,7 @@ import React from "react";
 import {useCollection} from "react-firebase-hooks/firestore";
 import {auth, db} from "../firebase";
 import firebase from "firebase";
+import HomepageV2 from "./homepage-v2";
 
 const Banner = ({purpose, title1, title2, desc1,desc2, buttonText, linkName, imageUrl}) => (
     <Flex flexWrap="wrap" justifyContent="center" alignItems="center" m="10">
@@ -54,6 +55,9 @@ function Home(){
     return (
       <>
           <Box>
+              <Box>
+                  <HomepageV2/>
+              </Box>
               <Banner
                   purpose="RENT A HOME"
                   title1="Rental Homes for"
