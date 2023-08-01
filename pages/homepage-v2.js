@@ -40,7 +40,7 @@ const HomepageV2 = () => {
                 <Box>
                     <Flex flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
                         <Box fontSize={"4xl"} fontWeight={"bold"} color={"white"} textShadow="2px 2px 4px rgba(0, 0, 0, 0.7)">Find your next home</Box>
-                        <Box maxW={"50%"} mt={"2%"}>
+                        <Box maxW={["100%", "50%"]} mt={"2%"}>
                             <Box bg={"blackAlpha.500"} borderRadius={"10px"}>
                                 <SearchFilters backgroundColor={"blackAlpha.300"} borderRadius={"10px"}/>
                             </Box>
