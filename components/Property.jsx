@@ -140,23 +140,13 @@ const Property  = ({ coverPhoto, price, rentFrequency, rooms, ward,title, baths,
             });
     }, [likesRef]);
 
-
-
-
-
     return (
         <>
-            {/*<Box>
-                {timestamp && <Text>Posted {timestamp}</Text>}
-                <Image src={coverPhoto ? coverPhoto : defaultImage} width={400} height={260} alt="Image"/>
-            </Box>
-*/}
-
             <Flex flexWrap="wrap" w="420px" p="5" paddingTop="0" justifyContent="flex-start" cursor="pointer">
                 {/*<Link href={`/property/${propertyID}`} passHref>*/}
                 <Flex direction="column" alignItems="center">
                     <Box position="relative" mb={4} height={260} maxHeight={260} width={380} >
-                        <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} minHeight={260} height={260} width={380} boxSize="400px" />
+                        <Image src={images[currentImageIndex]} alt={`Image ${currentImageIndex + 1}`} minHeight={260} height={260} width={380} boxsize="400px" />
                         <Center position="absolute" top="50%" left={0} transform="translateY(-50%)">
                             <IconButton
                                 aria-label="Previous Image"

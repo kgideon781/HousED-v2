@@ -11,28 +11,11 @@ import searchFilters from "../components/SearchFilters";
 
 const HomepageV2 = () => {
     const [filters, setFilters] = useState(filterData);
+    const [searchFilters, setSearchFilters] = useState(true);
     const router = useRouter();
     const path = router.pathname;
+
     const { query } = router;
-    const searchProperties = (filterValues) => {
-        const path = router.pathname;
-
-        const { query } = router;
-
-
-        const values = getFilterValues(filterValues);
-
-        values.forEach((item) => {
-            if (item.value && filterValues?.[item.name]){
-                query[item.name] = item.value
-
-            }
-
-        })
-
-        router.push({pathname: path, query})
-
-    }
 
     return (
         <Box>
@@ -42,7 +25,7 @@ const HomepageV2 = () => {
                         <Box fontSize={"4xl"} fontWeight={"bold"} color={"white"} textShadow="2px 2px 4px rgba(0, 0, 0, 0.7)">Find your next home</Box>
                         <Box maxW={["100%", "50%"]} mt={"2%"}>
                             <Box bg={"blackAlpha.500"} borderRadius={"10px"}>
-                                <SearchFilters backgroundColor={"blackAlpha.300"} borderRadius={"10px"}/>
+                                {searchFilters && <SearchFilters setSearchFilters={setSearchFilters} backgroundColor={"blackAlpha.300"} borderRadius={"10px"}/>}
                             </Box>
                         </Box>
 

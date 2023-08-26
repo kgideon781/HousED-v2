@@ -18,7 +18,7 @@ import property from "../components/Property";
 
 function Search (){
 
-    const [searchFilters, setSearchFilters] = useState(false);
+    const [searchFilters, setSearchFilters] = useState(true);
     const router = useRouter();
     const [realProps] = useCollection(db.collection("properties"))
     const [qryResults, setQryResults] = useState([])
@@ -171,7 +171,7 @@ function Search (){
                 <Icon paddingLeft="2" w="7" as={BsFilter}></Icon>
             </Flex>
 
-            {searchFilters && <SearchFilters borderRadius={0} backgroundColor={"grey.300"}/>}
+            {searchFilters && <SearchFilters setSearchFilters={setSearchFilters} borderRadius={0} backgroundColor={"grey.300"}/>}
             <Text fontSize="2xl" p="4" fontWeight="bold">
                 Properties {router.query.purpose}
 

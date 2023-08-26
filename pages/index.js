@@ -71,6 +71,7 @@ function Home(){
               <Skeleton isLoaded={!loadingForRent}>
               <Flex flexWrap="wrap">
                   {propertiesForRent?.docs.map((property) => (
+
                       <Property
                           key={property.id}
                           propertyID={property.id}

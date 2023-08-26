@@ -7,7 +7,7 @@ import {useEffect, useState} from "react";
 import {filterData, getFilterValues} from "../utils/filterData";
 import Router from 'next/router';
 
-const SearchFilters = ({backgroundColor, borderRadius}) => {
+const SearchFilters = ({backgroundColor, borderRadius, setSearchFilters}) => {
     const [filters, setFilters] = useState(filterData);
     const router = useRouter();
     const path = router.pathname;
@@ -32,7 +32,6 @@ const SearchFilters = ({backgroundColor, borderRadius}) => {
     }, [query]);
 
     const searchProperties = (filterValues) => {
-        const path = router.pathname;
 
         const { query } = router;
 
@@ -47,6 +46,7 @@ const SearchFilters = ({backgroundColor, borderRadius}) => {
 
         })
 
+
         router.push({pathname: "/search", query})
 
     }
@@ -55,6 +55,7 @@ const SearchFilters = ({backgroundColor, borderRadius}) => {
         setFilters((prevFilters) =>
             prevFilters.map((f) => ({ ...f, selectedValue: undefined }))
         );
+
         router.replace('/search', undefined, { shallow: true });
     }
 
@@ -81,7 +82,11 @@ const SearchFilters = ({backgroundColor, borderRadius}) => {
                     </Select>
                 </Box>
             ))}
-            <Button color="red.400" top="2" p="4" onClick={clearFilters}>Clear Filters</Button>
+            <Button color="red.400" top="2" p="4" onClick={() => {
+                clearFilters()
+                setSearchFilters(false);
+            }
+            }>Clear Filters</Button>
 
         </Flex>
     )

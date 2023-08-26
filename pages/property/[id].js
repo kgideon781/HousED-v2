@@ -1,4 +1,16 @@
-import {Box, Flex, Text, Button, Image, Icon, Stack, useMediaQuery} from "@chakra-ui/react";
+import {
+    Box,
+    Flex,
+    Text,
+    Button,
+    Image,
+    Icon,
+    Stack,
+    useMediaQuery,
+    Modal,
+    ModalOverlay,
+    ModalContent, ModalHeader, ModalCloseButton, ModalBody, Textarea, ModalFooter, useDisclosure, Toast
+} from "@chakra-ui/react";
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
 import {GoVerified} from "react-icons/go";
@@ -11,14 +23,23 @@ import {BiBookmark, BiChevronRight, BiEnvelope, BiFlag, BiLogoWhatsapp, BiPhoneC
 import {PiShareFatFill} from "react-icons/pi";
 
 
-const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, ward, county, title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp, propertyID}}) => {
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, ward, county, title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp}}) => {
+    const [isBookmarked, setIsBookmarked] = useState();
 
     const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
+    const [propertyID, setPropertyID] = useState('');
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [reportReason, setReportReason] = useState('');
+    const [additionalComments, setAdditionalComments] = useState('');
+
 
     useEffect(() => {
-        db.collection("agencies").doc(propertyID).get().then((doc) => {
+        const PIDFromUrl = window.location.href;
+        const urlParts = PIDFromUrl.split('/');
+        const extractedPropertyID = urlParts[urlParts.length - 1];
+        db.collection("agencies").doc(extractedPropertyID).get().then((doc) => {
             if (doc.exists) {
                 console.log("Document data:", doc.data());
             } else {
@@ -28,10 +49,11 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
         }).catch((error) => {
             console.log("Error getting document:", error);
         });
+
     }, []);
 
-    // Format the date as a string in the desired format.
 
+    // Format the date as a string in the desired format.
     const date = new Date(timestamp.seconds * 1000); // Multiply by 1000 to convert seconds to milliseconds
 
     const day = date.getDate();
@@ -61,6 +83,15 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
         };
     }, []);
 
+    useEffect(() => {
+        const PIDFromUrl = window.location.href;
+        const urlParts = PIDFromUrl.split('/');
+        const extractedPropertyID = urlParts[urlParts.length - 1];
+        setPropertyID(extractedPropertyID);
+        const bookmarkedProperties = JSON.parse(localStorage.getItem('bookmarkedProperties')) || [];
+        const isPropertyBookmarked = bookmarkedProperties.includes(propertyID);
+        setIsBookmarked(isPropertyBookmarked);
+    }, [propertyID]);
 
     useEffect(() => {
         setUrl(window.location.href);
@@ -79,6 +110,64 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
             // Handle sharing fallback for unsupported browsers or devices
         }
     };
+
+    const toggleBookmark = () => {
+        setIsBookmarked(prevIsBookmarked => {
+            const bookmarkedProperties = JSON.parse(localStorage.getItem('bookmarkedProperties')) || [];
+
+            // Check if the property ID is already bookmarked
+            const isPropertyBookmarked = bookmarkedProperties.includes(propertyID);
+
+            let updatedBookmarks;
+            if (isPropertyBookmarked) {
+                // Remove the property ID from the bookmarks if it's already bookmarked
+                updatedBookmarks = bookmarkedProperties.filter(id => id !== propertyID);
+            } else {
+                // Add the property ID to the bookmarks if it's not bookmarked
+                updatedBookmarks = [...bookmarkedProperties, propertyID];
+            }
+
+            localStorage.setItem('bookmarkedProperties', JSON.stringify(updatedBookmarks));
+
+            return !isPropertyBookmarked;
+        });
+    };
+
+    const handleReportSubmit = () => {
+        // You can perform validation on the form fields here
+
+        // Create a report object with the form data
+        const reportData = {
+            reason: reportReason,
+            comments: additionalComments,
+            // You can also include other data if needed
+        };
+
+
+
+
+        db.collection("reports").add(reportData).then(() => {
+            console.log("Report submitted successfully");
+        }).then(() => {
+            db.collection("properties").doc(propertyID).update({
+                isReported: true
+            }).then(r => Toast({
+                title: "Report submitted.",
+                description: "Thank you for reporting this property. We will review it and take appropriate action.",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            }))
+        }).catch((error) => {
+            console.error("Error submitting report: ", error);
+        });
+
+        // Close the modal and reset form fields
+        onClose();
+        setReportReason('');
+        setAdditionalComments('');
+    };
+
 
     const initMap = () => {
         new window.google.maps.Map(mapContainerRef.current, {
@@ -114,8 +203,9 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                                 <Flex>
                                     {/*Bookmark and share buttons*/}
                                     <Flex display={["none", "block"]}>
-                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
-                                            <BiBookmark/>   Bookmark
+                                        <Button colorScheme="blue" variant={isBookmarked ? "solid" : "outline"} size="sm" marginRight="2" onClick={toggleBookmark}
+                                        >
+                                            <BiBookmark /> {isBookmarked ? "Bookmarked" : "Bookmark"}
                                         </Button>
                                         <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
                                             <PiShareFatFill/>   Share
@@ -125,8 +215,9 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
 
 
                                     <Flex display={["block", "none"]}>
-                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2">
-                                            <BiBookmark/>
+                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2" onClick={toggleBookmark}
+                                        >
+                                            <BiBookmark /> {isBookmarked ? "Bookmarked" : "Bookmark"}
                                         </Button>
                                         <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
                                         <PiShareFatFill/>
@@ -229,13 +320,13 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
 
                             <Flex justifyContent={"center"} alignItems={"center"}>
                                 <Stack direction='row' spacing={4}>
-                                    <Button leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
+                                    <Button leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `tel:${agency?.phone}`}>
                                         Call us
                                     </Button>
-                                    <Button leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid'>
+                                    <Button leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `mailto:${agency?.email}`}>
                                         Email
                                     </Button>
-                                    <Button leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid'>
+                                    <Button leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid' onClick={() => window.open(`https://wa.me/${agency?.phone}`, '_blank')}>
                                         Whatsapp
                                     </Button>
                                 </Stack>
@@ -258,12 +349,42 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                     </Box>
                 </Box>
                 <Box p={"1%"} w={"100%"} mt={"5%"}>
-                    <Button w={"100%"} leftIcon={<BiFlag/>} colorScheme='blue' variant='outline'>
+                    <Button w={"100%"} leftIcon={<BiFlag/>} colorScheme='blue' variant='outline' onClick={onOpen}>
                         Report this property
                     </Button>
                 </Box>
 
             </Box>
+
+            {/*Report property modal*/}
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Report Property</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Textarea
+                            placeholder="Reason for reporting"
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                        />
+                        <Textarea
+                            placeholder="Additional comments"
+                            value={additionalComments}
+                            onChange={(e) => setAdditionalComments(e.target.value)}
+                        />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="red" mr={3} onClick={handleReportSubmit}>
+                            Submit
+                        </Button>
+                        <Button variant="ghost" onClick={onClose}>
+                            Cancel
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
 
         </Flex>
     )
@@ -281,10 +402,5 @@ export async function getServerSideProps({ params: {id}} ){
         }
     };
 }
-
-
-//TODO: make contact agent button work and add their details
-//TODO: add related properties
-//TODO: add
 
 export default PropertyDetails;
