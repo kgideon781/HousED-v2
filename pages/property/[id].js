@@ -33,6 +33,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [reportReason, setReportReason] = useState('');
     const [additionalComments, setAdditionalComments] = useState('');
+    const toast = useToast();
 
 
 
@@ -149,7 +150,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
             .add(reportData)
             .then(() => {
                 console.log("Report submitted successfully");
-                const toast = useToast();
                 toast({
                     title: "Report submitted.",
                     description: "Thank you for reporting this property. We will review it and take appropriate action.",
@@ -164,6 +164,12 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
             .catch((error) => {
                 console.error("Error submitting report: ", error);
             });
+
+        // Close the modal and reset form fields
+        onClose();
+        setReportReason('');
+        setAdditionalComments('');
+
     };
     const initMap = () => {
         new window.google.maps.Map(mapContainerRef.current, {
