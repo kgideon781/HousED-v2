@@ -33,6 +33,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [reportReason, setReportReason] = useState('');
     const [additionalComments, setAdditionalComments] = useState('');
+    const toast = Toast();
 
 
     useEffect(() => {
@@ -151,17 +152,18 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
         }).then(() => {
             db.collection("properties").doc(propertyID).update({
                 isReported: true
-            }).then(r => Toast({
-                title: "Report submitted.",
-                description: "Thank you for reporting this property. We will review it and take appropriate action.",
-                status: "success",
-                duration: 9000,
-                isClosable: true,
-            }))
+            })
         }).catch((error) => {
             console.error("Error submitting report: ", error);
         });
 
+        toast({
+            title: "Report submitted.",
+            description: "Thank you for reporting this property. We will review it and take appropriate action.",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+        })
         // Close the modal and reset form fields
         onClose();
         setReportReason('');
