@@ -36,7 +36,6 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     const toast = useToast();
 
 
-
     useEffect(() => {
         const PIDFromUrl = window.location.href;
         const urlParts = PIDFromUrl.split('/');

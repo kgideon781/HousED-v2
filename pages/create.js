@@ -10,7 +10,7 @@ import {
     Radio,
     RadioGroup, Select, SimpleGrid,
     Text,
-    Textarea, Image, IconButton
+    Textarea, Image, IconButton, Link
 } from "@chakra-ui/react";
 import {Form} from "react-router-dom";
 import {auth, db, storage} from "../firebase";
@@ -378,6 +378,9 @@ export default function multistep() {
     const toast = useToast()
     const currentUser = auth?.currentUser;
     const currentUserID = currentUser && currentUser.uid;
+    const [userAgency, setUserAgency] = useState("");
+    const [userAgencyID, setUserAgencyID] = useState("");
+
     const [formData, setFormData] = useState({
         title: "",
         purpose: "for-rent",
@@ -406,6 +409,7 @@ export default function multistep() {
         );
     };
 
+
     const submitProperty = async (e) => {
         e.preventDefault();
 
@@ -425,6 +429,7 @@ export default function multistep() {
                 county: formData.county,
                 constituency: formData.constituency,
                 uid: currentUserID,
+                agent: userAgencyID,
                 ward: formData.ward,
                 latitude: formData.latitude,
                 type: "Rental Apartment",
@@ -483,106 +488,133 @@ export default function multistep() {
         if(currentUser === null){
             router.push('/signin')
         }
+
+        //if user is logged in check if they belong to an agency
+        if(currentUser){
+            const userUid = currentUser.uid;
+
+            // Query the 'agencies' collection for the agency associated with the current user's UID
+            db.collection('agencies').where('userID', '==', userUid).get().then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    // Assuming there's only one agency associated with the user
+                    const agencyDocSnapshot = querySnapshot.docs[0];
+                    const agencyData = agencyDocSnapshot.data();
+                    console.log("Agency Information:", agencyData);
+                    setUserAgencyID(agencyData.agentID);
+                    setUserAgency(agencyData?.name)
+                } else {
+                    console.log("User doesn't belong to any agency");
+                }
+            }).catch((error) => {
+                console.error("Error fetching agency document:", error);
+            });
+        }
+
     }, []);
     return (
-        <Flex width="100%" flexWrap={"wrap"}>
-            {/*Left form*/}
-            <Box
-                borderWidth="1px"
-                rounded="lg"
-                borderColor="gray.200"
-                width={"55%"}
-                p={6}
-                m="10px 2px"
-                as="form">
-                <Progress
-                    hasStripe
-                    value={progress}
-                    mb="5%"
-                    mx="5%"
-                    isAnimated></Progress>
-                {step === 1 ? <Form1 formData={formData} setFormData={setFormData} /> :
-                    step === 2 ? <Form2 formData={formData} setFormData={setFormData} /> :
-                        <Form3 formData={formData} setFormData={setFormData} />}
-                <ButtonGroup mt="5%" w="100%">
-                    <Flex w="100%" justifyContent="space-between">
-                        <Flex>
-                            <Button
-                                onClick={() => {
-                                    setStep(step - 1);
-                                    setProgress(progress - 33.33);
+        <Box width="100%" flexWrap={"wrap"}>
+            {userAgency ? <Box p={"1%"} bg={'green.200'} color={"white"}> Posting property on behalf of <strong>Agency: {userAgency}</strong></Box> : <Box p={"1%"} bg={'red'} color={"white"}>Only landlords, agents and agency are allowed to post property. To register <Link href={"/account-setup"} textDecoration={"underline"} color={'blue.200'}>click here</Link> </Box>}
+            <Box>Agent info</Box>
+            <Flex>
+                {/*Left form*/}
+                <Box
+                    borderWidth="1px"
+                    rounded="lg"
+                    borderColor="gray.200"
+                    width={"55%"}
+                    p={6}
+                    m="10px 2px"
+                    as="form">
+                    <Progress
+                        hasStripe
+                        value={progress}
+                        mb="5%"
+                        mx="5%"
+                        isAnimated></Progress>
+                    {step === 1 ? <Form1 formData={formData} setFormData={setFormData} /> :
+                        step === 2 ? <Form2 formData={formData} setFormData={setFormData} /> :
+                            <Form3 formData={formData} setFormData={setFormData} />}
+                    <ButtonGroup mt="5%" w="100%">
+                        <Flex w="100%" justifyContent="space-between">
+                            <Flex>
+                                <Button
+                                    onClick={() => {
+                                        setStep(step - 1);
+                                        setProgress(progress - 33.33);
 
-                                }}
-                                isDisabled={step === 1}
-                                colorScheme="teal"
-                                variant="solid"
-                                w="7rem"
-                                mr="5%">
-                                Back
-                            </Button>
-                            <Button
-                                w="7rem"
-                                isDisabled={step === 3}
-                                onClick={() => {
-                                    setStep(step + 1);
-                                    if (step === 3) {
-                                        setProgress(100);
-                                    } else {
-                                        setProgress(progress + 33.33);
-                                    }
-                                }}
-                                colorScheme="teal"
-                                variant="outline">
-                                Next
-                            </Button>
+                                    }}
+                                    isDisabled={step === 1}
+                                    colorScheme="teal"
+                                    variant="solid"
+                                    w="7rem"
+                                    mr="5%">
+                                    Back
+                                </Button>
+                                <Button
+                                    w="7rem"
+                                    isDisabled={step === 3}
+                                    onClick={() => {
+                                        setStep(step + 1);
+                                        if (step === 3) {
+                                            setProgress(100);
+                                        } else {
+                                            setProgress(progress + 33.33);
+                                        }
+                                    }}
+                                    colorScheme="teal"
+                                    variant="outline">
+                                    Next
+                                </Button>
+                            </Flex>
+                            {step === 3 ? (
+                                <Button
+                                    w="7rem"
+                                    colorScheme="red"
+                                    variant="solid"
+                                    onClick={(e) => {
+                                        submitProperty(e)
+                                    }}>
+                                    Submit
+                                </Button>
+                            ) : null}
                         </Flex>
-                        {step === 3 ? (
-                            <Button
-                                w="7rem"
-                                colorScheme="red"
-                                variant="solid"
-                                onClick={(e) => {
-                                    submitProperty(e)
-                                }}>
-                                Submit
-                            </Button>
-                        ) : null}
-                    </Flex>
-                </ButtonGroup>
-            </Box>
-            {/*Left form*/}
-            {/*multiple image picker*/}
-            <Box
-                borderWidth="1px"
-                rounded="lg"
-                width={"35%"}
-                p={6}
-                m="10px 2px"
-                as="form">
-                <Text fontSize="xl" fontWeight="bold" mb="5%">
-                    Upload Images
-                </Text>
-                <Input p={"4px"} type="file" multiple onChange={handleFileChange} />
-                <SimpleGrid columns={2} spacing="10px" mt="2">
-                    {selectedImages.map((image) => (
-                        <Box position="relative">
-                            <Image key={image.name} src={URL.createObjectURL(image)} alt={image.name} boxSize="200px" objectFit="contain" />
-                            <IconButton
-                                onClick={() => handleRemoveImage(image.name)}
-                                position="absolute"
-                                top="0"
-                                right="0"
-                                zIndex="1"
-                                aria-label="Remove image"
-                                colorScheme={"red"}
-                                size={"sm"}
-                                icon={<CloseIcon />}
-                            />
-                        </Box>
-                    ))}
-                </SimpleGrid>
+                    </ButtonGroup>
+                </Box>
+                {/*Left form*/}
+                {/*multiple image picker*/}
+                <Box
+                    borderWidth="1px"
+                    rounded="lg"
+                    width={"35%"}
+                    p={6}
+                    m="10px 2px"
+                    as="form">
+                    <Text fontSize="xl" fontWeight="bold" mb="5%">
+                        Upload Images
+                    </Text>
+                    <Input p={"4px"} type="file" multiple onChange={handleFileChange} />
+                    <SimpleGrid columns={2} spacing="10px" mt="2">
+                        {selectedImages.map((image) => (
+                            <Box position="relative">
+                                <Image key={image.name} src={URL.createObjectURL(image)} alt={image.name} boxSize="200px" objectFit="contain" />
+                                <IconButton
+                                    onClick={() => handleRemoveImage(image.name)}
+                                    position="absolute"
+                                    top="0"
+                                    right="0"
+                                    zIndex="1"
+                                    aria-label="Remove image"
+                                    colorScheme={"red"}
+                                    size={"sm"}
+                                    icon={<CloseIcon />}
+                                />
+                            </Box>
+                        ))}
+                    </SimpleGrid>
 
-            </Box>
-        </Flex>
+                </Box>
+            </Flex>
+
+        </Box>
     );
 }

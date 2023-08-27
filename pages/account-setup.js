@@ -36,26 +36,39 @@ const AccountSetup = () => {
             lastName,
             position,
             role: "admin",
-        }, {merge: true}).then(() => {
-            if (position === 'agency'){
-                db.collection('agencies').add({
+        }, {merge: true}).then(async () => {
+            if (position === 'agency') {
+
+                const agencyData = {
                     name: agencyName,
                     location,
                     phone,
                     email,
                     position,
-                    agent: currentUser.uid,
-                })
-            }
-            else {
-                db.collection('agencies').add({
+                    userID: currentUser.uid,
+                };
+                const agencyRef = await db.collection('agencies').add(agencyData);
+                const agencyID = agencyRef.id;
+
+                await agencyRef.update({
+                    agentID: agencyID,
+                });
+            } else {
+
+                const agencyData = {
                     name,
                     lastName,
                     phone,
                     email,
                     position,
-                    agent: currentUser.uid,
-                })
+                    userID: currentUser.uid,
+                };
+                const agencyRef = await db.collection('agencies').add(agencyData);
+                const agencyID = agencyRef.id;
+
+                await agencyRef.update({
+                    agentID: agencyID,
+                });
             }
 
             console.log("Document successfully written!");
