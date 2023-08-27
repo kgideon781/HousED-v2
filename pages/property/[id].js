@@ -211,9 +211,9 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
 
 
                                     <Flex display={["block", "none"]}>
-                                        <Button colorScheme="blue" variant="outline" size="sm" marginRight="2" onClick={toggleBookmark}
+                                        <Button colorScheme="blue" variant={isBookmarked ? "solid" : "outline"} size="sm" marginRight="2" onClick={toggleBookmark}
                                         >
-                                            <BiBookmark /> {isBookmarked ? "Bookmarked" : "Bookmark"}
+                                            <BiBookmark />
                                         </Button>
                                         <Button colorScheme="blue" variant="outline" size="sm" onClick={handleShare}>
                                         <PiShareFatFill/>
