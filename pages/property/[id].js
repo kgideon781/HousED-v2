@@ -9,7 +9,7 @@ import {
     useMediaQuery,
     Modal,
     ModalOverlay,
-    ModalContent, ModalHeader, ModalCloseButton, ModalBody, Textarea, ModalFooter, useDisclosure, Toast
+    ModalContent, ModalHeader, ModalCloseButton, ModalBody, Textarea, ModalFooter, useDisclosure, Toast, useToast
 } from "@chakra-ui/react";
 import {FaBed, FaBath} from "react-icons/fa";
 import {BsGridFill} from "react-icons/bs";
@@ -33,7 +33,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [reportReason, setReportReason] = useState('');
     const [additionalComments, setAdditionalComments] = useState('');
-    const toast = Toast();
+
 
 
     useEffect(() => {
@@ -145,32 +145,26 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
         };
 
 
-
-
-        db.collection("reports").add(reportData).then(() => {
-            console.log("Report submitted successfully");
-        }).then(() => {
-            db.collection("properties").doc(propertyID).update({
-                isReported: true
+        db.collection("reports")
+            .add(reportData)
+            .then(() => {
+                console.log("Report submitted successfully");
+                const toast = useToast();
+                toast({
+                    title: "Report submitted.",
+                    description: "Thank you for reporting this property. We will review it and take appropriate action.",
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                });
+                return db.collection("properties").doc(propertyID).update({
+                    isReported: true,
+                });
             })
-        }).catch((error) => {
-            console.error("Error submitting report: ", error);
-        });
-
-        toast({
-            title: "Report submitted.",
-            description: "Thank you for reporting this property. We will review it and take appropriate action.",
-            status: "success",
-            duration: 9000,
-            isClosable: true,
-        })
-        // Close the modal and reset form fields
-        onClose();
-        setReportReason('');
-        setAdditionalComments('');
+            .catch((error) => {
+                console.error("Error submitting report: ", error);
+            });
     };
-
-
     const initMap = () => {
         new window.google.maps.Map(mapContainerRef.current, {
             center: { lat: 0.479208, lng: 35.266436 }, // Set your desired latitude and longitude
