@@ -351,7 +351,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                     </Box>
                 </Box>
                 <Box p={"1%"} w={"100%"} mt={"5%"}>
-                    <Button w={"100%"} leftIcon={<BiFlag/>} colorScheme='blue' variant='outline' onClick={onOpen}>
+                    <Button w={"100%"} leftIcon={<BiFlag/>} colorScheme='red' variant='outline' onClick={onOpen}>
                         Report this property
                     </Button>
                 </Box>
