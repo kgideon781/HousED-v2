@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Input,
@@ -14,22 +14,132 @@ import {
     useBreakpointValue, Heading, Flex, Avatar, AvatarGroup, Container, SimpleGrid
 } from '@chakra-ui/react';
 import {auth, db} from '../firebase';
+import firebase from "firebase";
+import {useRouter} from "next/router";
 
 const AccountSetup = () => {
+    const [agencyCode, setAgencyCode] = useState('');
     const [name, setName] = useState('');
     const [lastName, setLastName] = useState('');
     const [position, setPosition] = useState('');
     const [agencyName, setAgencyName] = useState('');
     const [location, setLocation] = useState('');
     const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [agencyEmail, setAgencyEmail] = useState('');
 
-    const currentUser = auth.currentUser;
+    //handling agency retrieval
+    const [agencyErrorMessage, setAgencyErrorMessage] = useState('');
+    //show the agency details when there was a match
+    const [showAgencyName, setShowAgencyName] = useState('');
+    const [agencyID, setAgencyID] = useState('');
 
+    const [showNewAgencyFields, setShowNewAgencyFields] = useState(false);
+
+    const [currentUser, setCurrentUser] = useState(null);
+    const current_username = currentUser?.displayName;
+    const router = useRouter();
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setCurrentUser(user);
+            }
+        });
+
+        return () => unsubscribe(); // Cleanup on component unmount
+
+    }, []);
+
+    useEffect(() => {
+        // Check if the user's role is 'admin' and redirect to the home
+        const fetchData = async () => {
+            try {
+                // Check if currentUser is available and not null
+                if (currentUser && currentUser.uid) {
+                    const doc = await db.collection('users').doc(currentUser.uid).get();
+
+                    if (doc.exists) {
+                        const data = doc.data();
+
+                        if (data.role === 'admin') {
+                            // Redirect to the homepage
+                            await router.push('/');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error getting document:", error);
+
+                // Handle error and redirect if needed
+                if (error.message.includes("Hydration failed")) {
+                    // Redirect to the homepage
+                    await router.push('/');
+                }
+            }
+        };
+
+        fetchData();
+    }, [currentUser, router]);
+
+    // Make sure the user is logged in and the position, location and phone are filled before proceeding
+    const isInvalid =
+        (position === '' || location === '' || phone === '') &&
+        (agencyCode === '');
+
+    const handlePositionChange = (value) => {
+        setPosition(value);
+        setShowAgencyName("")
+        // Reset fields when position changes
+        setAgencyCode("")
+        setAgencyName('');
+        setLocation('');
+        setPhone('');
+        setAgencyEmail('');
+        setShowNewAgencyFields(false);
+    };
+    //generate a random agency code 6 characters long, first three should be alphanumeric and last three should be numeric
+    const generateAgencyCode = () => {
+        const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const numeric = '0123456789';
+        let code = '';
+        for (let i = 0; i < 3; i++) {
+            code += alphanumeric.charAt(Math.floor(Math.random() * alphanumeric.length));
+        }
+        for (let i = 0; i < 3; i++) {
+            code += numeric.charAt(Math.floor(Math.random() * numeric.length));
+        }
+        return code;
+    };
+
+
+
+    const handleAgencyCodeCheck = () => {
+        // Check if the agency code exists
+        db.collection('agencies').where('agencyCode', '==', agencyCode).get().then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                setAgencyErrorMessage("The agency code you entered does not exist. Please try again or register a new agency.")
+            } else {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log(data.agencyID)
+                    setAgencyID(data.agencyID)
+                    setAgencyErrorMessage("");
+                    setShowAgencyName(data.name)
+                    /*setAgencyName(data.name);
+                    setLocation(data.location);
+                    setPhone(data.phone);
+                    setAgencyEmail(data.email);*/
+                    setShowNewAgencyFields(false);
+                });
+            }
+        }).catch((error) => {
+            console.log("Error getting documents: ", error);
+        });
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Save the user data to Firestore
         await db.collection('users').doc(currentUser.uid).set({
             displayName: name + ' ' + lastName,
             name,
@@ -38,37 +148,61 @@ const AccountSetup = () => {
             role: "admin",
         }, {merge: true}).then(async () => {
             if (position === 'agency') {
-
                 const agencyData = {
                     name: agencyName,
                     location,
                     phone,
-                    email,
+                    userEmail,
+                    agencyEmail,
                     position,
-                    userID: currentUser.uid,
+                    createdBy: currentUser.uid,
+                    dateCreated: firebase.firestore.FieldValue.serverTimestamp()
                 };
-                const agencyRef = await db.collection('agencies').add(agencyData);
-                const agencyID = agencyRef.id;
+                if (agencyID !== '') {
+                    console.log(agencyID)
+                    const currentUserData = {
+                        agentName: currentUser.displayName,
+                        userID: currentUser.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    }
+                        await db.collection('agencies').doc(agencyID).collection("agents").add(currentUserData);
+                }else {
+                    const agencyRef = await db.collection('agencies').add(agencyData);
+                    const agencyID = agencyRef.id;
+                    const generatedAgencyCode = generateAgencyCode();
 
-                await agencyRef.update({
-                    agentID: agencyID,
-                });
+                   // setAgencyID(agencyID);
+                    await agencyRef.update({
+                        agencyID: agencyID,
+                        agencyCode: generatedAgencyCode,
+                    }, {merge: true}).then(async () => {
+                        const currentUserData = {
+                            agentName: currentUser.displayName,
+                            userID: currentUser.uid,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        }
+                        await db.collection('agencies').doc(agencyID).collection("agents").add(currentUserData);
+                    });
+                }
+
             } else {
 
                 const agencyData = {
                     name,
                     lastName,
                     phone,
-                    email,
+                    userEmail,
                     position,
                     userID: currentUser.uid,
+                    userVerified: false,
                 };
                 const agencyRef = await db.collection('agencies').add(agencyData);
                 const agencyID = agencyRef.id;
-
+                const generatedAgencyCode = generateAgencyCode();
                 await agencyRef.update({
                     agentID: agencyID,
-                });
+                    agencyCode: generatedAgencyCode,
+                }, {merge: true});
             }
 
             console.log("Document successfully written!");
@@ -83,7 +217,9 @@ const AccountSetup = () => {
         setAgencyName('');
         setLocation('');
         setPhone('');
-        setEmail('');
+        setAgencyEmail('');
+        setUserEmail("")
+        setShowAgencyName("")
     };
     const avatars = [
         {
@@ -129,6 +265,7 @@ const AccountSetup = () => {
                         </Text>{' '}
                         Real Estate Agencies
                     </Heading>
+                    <Text>Secure your space, guard against scams. Complete our quick registration form for landlords, agents, and agencies. Let's build a trusted community together!</Text>
                     <Stack direction={'row'} spacing={4} align={'center'}>
                         <AvatarGroup>
                             {avatars.map((avatar) => (
@@ -207,12 +344,14 @@ const AccountSetup = () => {
                             Fill out the form below to join our team of Owners and Agencies.
                         </Text>
                     </Stack>
-                    <Box as={'form'} mt={10}>
+                    <Box mt={10}>
                         <form onSubmit={handleSubmit}>
                             <Stack spacing={4}>
                                 <HStack>
+
                                     <Box>
-                                        <FormControl id="firstName" isRequired>
+
+
                                             <Input
                                                 placeholder="First Name"
                                                 bg={'gray.100'}
@@ -225,7 +364,7 @@ const AccountSetup = () => {
                                                 onChange={(e) => setName(e.target.value)}
                                                 required
                                             />
-                                        </FormControl>
+
                                     </Box>
                                     <Box>
                                         <FormControl id="lastName">
@@ -255,108 +394,142 @@ const AccountSetup = () => {
                                     }}
                                     disabled={true}
                                 />
-                                <RadioGroup onChange={setPosition} value={position} required>
-                                    <Radio m={"1%"} value="landlord">Landlord</Radio>
-                                    <Radio m={"1%"} value="caretaker">Caretaker</Radio>
-                                    <Radio m={"1%"} value="agency">Agency</Radio>
-                                </RadioGroup>
-                                {position === 'agency' && (
-                                    <>
-                                        <Input
-                                            placeholder="Agency Name"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            type="text"
-                                            value={agencyName}
-                                            onChange={(e) => setAgencyName(e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="Location"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="+254712345678"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            required
-                                        />
-                                    </>
-                                )}
-                                {position === 'landlord' && (
-                                    <>
-                                        <Input
-                                            placeholder="Location"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="+254712345678"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            required
-                                        />
-                                    </>
-                                )}
-                                {position === 'caretaker' && (
-                                    <>
-                                        <Input
-                                            placeholder="Location"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="+254712345678"
-                                            bg={'gray.100'}
-                                            border={0}
-                                            color={'gray.500'}
-                                            _placeholder={{
-                                                color: 'gray.500',
-                                            }}
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            required
-                                        />
-                                    </>
-                                )}
+                                <FormControl>
+                                    <FormLabel>I am a...</FormLabel>
+                                    <RadioGroup  onChange={handlePositionChange} value={position} required>
+                                        <Radio m={"1%"} value="landlord">Landlord</Radio>
+                                        <Radio m={"1%"} value="caretaker">Caretaker</Radio>
+                                        <Radio m={"1%"} value="agency">Agency</Radio>
+                                    </RadioGroup>
+                                    {position === 'agency' && (
+                                        <>
+                                            <Input
+                                                mb={2}
+                                                placeholder="Agency Code"
+                                                bg={'gray.100'}
+                                                border={0}
+                                                color={'gray.500'}
+                                                value={agencyCode}
+                                                _placeholder={{
+                                                    color: 'gray.500',
+                                                }}
+                                                type="text"
+                                                onChange={(e) => setAgencyCode(e.target.value)}
+                                                onBlur={handleAgencyCodeCheck}
+                                                required
+                                            />
+                                            {agencyErrorMessage ? <Text textColor={"red.500"} fontSize={"12px"}>{agencyErrorMessage}</Text> : <Text>{showAgencyName}</Text>}
+                                            <Text
+                                                color="blue.500"
+                                                cursor="pointer"
+                                                onClick={() => setShowNewAgencyFields(true)}
+                                                mt={2}
+                                            >
+                                                Register a new agency
+                                            </Text>
+
+                                            {showNewAgencyFields && (
+                                                <>
+                                                    {/* New agency fields */}
+                                                    <Input
+                                                        mb={2}
+                                                        placeholder="Agency Name"
+                                                        bg={'gray.100'}
+                                                        border={0}
+                                                        color={'gray.500'}
+                                                        _placeholder={{
+                                                            color: 'gray.500',
+                                                        }}
+                                                        type="text"
+                                                        value={agencyName}
+                                                        onChange={(e) => setAgencyName(e.target.value)}
+                                                        required={agencyCode === ''}
+                                                    />
+                                                    <Input
+                                                        mb={2}
+                                                        placeholder="Location"
+                                                        bg={'gray.100'}
+                                                        border={0}
+                                                        color={'gray.500'}
+                                                        _placeholder={{
+                                                            color: 'gray.500',
+                                                        }}
+                                                        value={location}
+                                                        onChange={(e) => setLocation(e.target.value)}
+                                                        required={agencyCode === ''}
+                                                    />
+                                                    <Flex>
+                                                        <Box mr={2}>
+                                                            <FormLabel>Phone e.g. 0712...</FormLabel>
+                                                            <Input
+
+                                                                placeholder="0712345678"
+                                                                bg={'gray.100'}
+                                                                border={0}
+                                                                color={'gray.500'}
+                                                                _placeholder={{
+                                                                    color: 'gray.500',
+                                                                }}
+                                                                value={phone}
+                                                                onChange={(e) => setPhone(e.target.value)}
+                                                                required={agencyCode === ''}
+                                                            />
+                                                        </Box>
+
+                                                        <Box>
+                                                            <FormLabel>Email</FormLabel>
+                                                            <Input
+                                                                placeholder="Agency Email"
+                                                                bg={'gray.100'}
+                                                                border={0}
+                                                                color={'gray.500'}
+                                                                _placeholder={{
+                                                                    color: 'gray.500',
+                                                                }}
+                                                                value={agencyEmail}
+                                                                onChange={(e) => setAgencyEmail(e.target.value)}
+                                                                required={agencyCode === ''}
+                                                            />
+                                                        </Box>
+
+                                                    </Flex>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                    {position === 'landlord' && (
+                                        <>
+                                            <Input
+                                                placeholder="+254712345678"
+                                                bg={'gray.100'}
+                                                border={0}
+                                                color={'gray.500'}
+                                                _placeholder={{
+                                                    color: 'gray.500',
+                                                }}
+                                                value={phone}
+                                                onChange={(e) => setPhone(e.target.value)}
+                                                required
+                                            />
+                                        </>
+                                    )}
+                                    {position === 'caretaker' && (
+                                        <>
+                                            <Input
+                                                placeholder="+254712345678"
+                                                bg={'gray.100'}
+                                                border={0}
+                                                color={'gray.500'}
+                                                _placeholder={{
+                                                    color: 'gray.500',
+                                                }}
+                                                value={phone}
+                                                onChange={(e) => setPhone(e.target.value)}
+                                                required
+                                            />
+                                        </>
+                                    )}
+                                </FormControl>
 
                             </Stack>
                             <Button

@@ -21,12 +21,15 @@ import {db} from "../../firebase";
 import ImageGallery from "../../components/ImagesGallery";
 import {BiBookmark, BiChevronRight, BiEnvelope, BiFlag, BiLogoWhatsapp, BiPhoneCall} from "react-icons/bi";
 import {PiShareFatFill} from "react-icons/pi";
+import {useCollection} from "react-firebase-hooks/firestore";
+import {Navigate, useNavigate} from "react-router";
+import {useRouter} from "next/router";
 
 
-const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, ward, county, title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp}}) => {
+const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, ward, county, title, baths, agency, isVerified, description, furnishingStatus, type, purpose, amenities, photos, timestamp, uid}}) => {
     const [isBookmarked, setIsBookmarked] = useState();
 
-    const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2Fprofile_image.png?alt=media&token=1c6f6a7b-bd5a-4cea-a15b-cb57b40cd569"
+    const profile_image = "https://firebasestorage.googleapis.com/v0/b/houseed-50461.appspot.com/o/misc%2FAdobeStock_63064599.jpeg?alt=media&token=2471031b-7b8f-4762-b9d8-359d74395d94"
     const mapContainerRef = useRef(null);
     const [url, setUrl] = useState('');
     const [propertyID, setPropertyID] = useState('');
@@ -34,24 +37,21 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     const [reportReason, setReportReason] = useState('');
     const [additionalComments, setAdditionalComments] = useState('');
     const toast = useToast();
+    const router = useRouter();
 
+    //agency variables
+    const [agentAvatar, setAgentAvatar] = useState(profile_image)
+    const [agencyName, setAgencyName] = useState('');
+    const [agencyEmail, setAgencyEmail] = useState('');
+    const [agencyPhone, setAgencyPhone] = useState('');
 
-    useEffect(() => {
-        const PIDFromUrl = window.location.href;
-        const urlParts = PIDFromUrl.split('/');
-        const extractedPropertyID = urlParts[urlParts.length - 1];
-        db.collection("agencies").doc(extractedPropertyID).get().then((doc) => {
-            if (doc.exists) {
-                console.log("Document data:", doc.data());
-            } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-            }
-        }).catch((error) => {
-            console.log("Error getting document:", error);
-        });
+    //user variables
+    const usersRef = db.collection("users");
+    const [userDisplayName, setUserDisplayName] = useState('');
 
-    }, []);
+    const [agencies, loading, error] = useCollection(
+        db.collection('agencies')
+    );
 
 
     // Format the date as a string in the desired format.
@@ -97,6 +97,38 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
     useEffect(() => {
         setUrl(window.location.href);
     }, []);
+    useEffect(() => {
+        usersRef.doc(uid).get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data()
+                setUserDisplayName(userData.displayName)
+                setAgentAvatar(userData.photoURL)
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                setAgentAvatar(profile_image)
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+
+        //get the agency details use 'agency' as agaencyID
+        db.collection("agencies").doc(agency).get().then((doc) => {
+            if (doc.exists) {
+               // console.log("Document data:", doc.data());
+                const agencyData = doc.data()
+                setAgencyName(agencyData.name)
+                setAgencyEmail(agencyData.agencyEmail)
+                setAgencyPhone(agencyData.phone)
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+
+    }, [usersRef, uid, agency]);
 
     const handleShare = () => {
         if (navigator.share) {
@@ -278,7 +310,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                         </Flex>
                     </Box>
                     <Box>
-                        {amenities?.length && <Text fontSize="2xl" fontWeight="black" marginTop="5">Amenities</Text>}
+                        {amenities?.length && <Text fontSize="2xl" fontWeight="bold" marginTop="5">Amenities</Text>}
                         <Flex flexWrap="wrap">
                             {amenities?.map((amenity) => (
                                 <Text
@@ -302,12 +334,12 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
             {/*Right side*/}
             <Box w={["100%", "30%"]}>
                 <Box>
-                    <Text fontSize="xl" fontWeight="black" marginTop="5">Contact Agent</Text>
+                    <Text fontFamily={"arial"} fontSize="20px" fontWeight="bold" marginTop="5">Contact Agent</Text>
                         <Box p="4" borderWidth={"1px"} borderColor={"gray.400"} borderRadius="5">
                             <Flex>
-                                <Image width={"80px"} height={"80px"} src={profile_image} placeholder={profile_image} alt={"agency logo"} borderRadius="50%" objectFit="cover"/>
+                                <Image width={"80px"} height={"80px"} src={agentAvatar ? agentAvatar : profile_image} placeholder={profile_image} alt={"agency logo"} borderRadius="50%" objectFit="cover"/>
                                 <Box m={"16px"} w={"100%"}>
-                                    {agency.name ? <Text fontWeight="bold" fontSize="lg">{agency.name}</Text> : <Text fontWeight="bold" fontSize="lg">Gide Legacy</Text>}
+                                    {userDisplayName ? <Text fontWeight="bold" fontSize="lg">{userDisplayName}</Text> : <Text fontWeight="bold" fontSize="lg"></Text>}
                                     <Flex alignItems={"center"} w={"100%"}>
                                         <Text fontSize={"12px"} fontWeight={"bold"} mr={"5px"}>No reviews</Text>
                                         <Flex m={"2%"} borderColor={"blue.400"} borderWidth={"1px"} w={"auto"} borderRadius={5} p={"2%"} cursor={"pointer"}>
@@ -315,22 +347,41 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                                             <Icon as={BiChevronRight} color="blue.400" w={5} h={5}/>
                                         </Flex>
                                     </Flex>
-                                    <Text>{agency?.phone}</Text>
                                 </Box>
                             </Flex>
 
                             <Flex justifyContent={"center"} alignItems={"center"}>
-                                <Stack direction='row' spacing={4}>
-                                    <Button leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `tel:${agency?.phone}`}>
+                                <Stack direction='row' spacing={4} w={"100%"}>
+                                    <Button flex={1} leftIcon={<BiPhoneCall/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `tel:${agencyPhone}`}>
                                         Call us
                                     </Button>
-                                    <Button leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `mailto:${agency?.email}`}>
+                                    <Button flex={1} leftIcon={<BiEnvelope/>} fontSize={"14px"} colorScheme='teal' variant='solid' onClick={() => window.location.href = `mailto:${agencyEmail}`}>
                                         Email
                                     </Button>
-                                    <Button leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid' onClick={() => window.open(`https://wa.me/${agency?.phone}`, '_blank')}>
+                                    <Button flex={1} leftIcon={<BiLogoWhatsapp/>} fontSize={"14px"} colorScheme='whatsapp' variant='solid' onClick={() => window.open(`https://wa.me/2540720968784`, '_blank')}>
                                         Whatsapp
                                     </Button>
                                 </Stack>
+                            </Flex>
+                            <Flex pt={2} pb={2} justifyContent={"flex-end"} alignItems={"flex-end"}>
+                                {
+                                    agencyName &&
+                                    <>
+                                        <Text>
+                                            Registered with:
+                                        </Text>
+                                        <Text
+                                        color="blue.500"
+                                        cursor="pointer"
+                                        textDecoration={"underline"}
+                                        onClick={() => router.push(`/agency/${agency}`)}
+                                        mt={2}
+                                    >
+                                        {agencyName}>
+                                    </Text>
+                                    </>
+
+                                }
                             </Flex>
                         </Box>
 
@@ -340,7 +391,7 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                 </Box>
                 {/*Google map place API*/}
                 <Box>
-                    <Text fontSize="xl" fontWeight="black" marginTop="5">Location</Text>
+                    <Text fontFamily={"arial"} fontSize="20px" fontWeight="bold" marginTop="5">Location on map</Text>
                     <Box p="4" bg="gray.100" borderRadius="5">
                         <Text fontWeight="bold" fontSize="lg">{agency?.name}</Text>
                         <Text>{agency?.phone}</Text>
