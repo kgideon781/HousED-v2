@@ -88,6 +88,7 @@ function Home(){
                           currentUser={currentUser}
                           ward={property.data().ward}
                           timestamp={property.data().timestamp}
+                          uid={property.data().uid}
                       />
                   ))}
 
@@ -128,6 +129,7 @@ function Home(){
                           ward={property.data().ward}
                           currentUser={currentUser}
                           timestamp={property.data().timestamp}
+                          uid={property.data().uid}
                       />
                   ))}
               </Flex>
