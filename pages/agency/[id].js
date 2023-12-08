@@ -1,8 +1,9 @@
 import React, {useEffect} from 'react';
-import {Avatar, Badge, Box, Divider, Flex, Heading, Stack, Text, Image} from "@chakra-ui/react";
+import {Avatar, Badge, Box, Divider, Flex, Heading, Stack, Text, Image, Icon} from "@chakra-ui/react";
 import {useRouter} from "next/router";
 import {db} from "../../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
+import {BiCurrentLocation} from "react-icons/bi";
 
 const AgencyDetails = () => {
     const router = useRouter();
@@ -15,9 +16,7 @@ const AgencyDetails = () => {
         agencyLocation: '',
         agencyDescription: '',
     })
-    const [properties, loading, error] = useCollection(
-        db.collection("properties").where("agencyID", "==", id)
-    );
+    const [properties, loading, error] = id && useCollection(db.collection("properties").where("agencyID", "==", id)) || [null, false, null];
 
 
     useEffect(() => {
@@ -102,8 +101,9 @@ const AgencyDetails = () => {
 
                                <Stack direction="row" mt={2} spacing={2}>
                                    <Badge colorScheme="green">{property.data().purpose}</Badge>
-                                   <Badge colorScheme="blue">{property.data().price}</Badge>
-                                   <Badge colorScheme="green">{property.data().ward}</Badge>
+                                   <Badge colorScheme="blue">KES. {property.data().price}</Badge>
+                                   <Badge colorScheme="green" display={"flex"} alignItems={"center"} justifyContent={"center"}><Icon as={BiCurrentLocation} /> {property.data().ward}</Badge>
+
                                </Stack>
                            </Box>
                        ))
