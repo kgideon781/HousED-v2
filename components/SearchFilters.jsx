@@ -1,11 +1,7 @@
-
-import {Flex, Select, Input, Text, Box, Spinner, Icon, Button} from "@chakra-ui/react";
+import {Box, Button, Flex, Select} from "@chakra-ui/react";
 import {useRouter} from "next/router";
-import {MdCancel} from "react-icons/md";
-import Image from "next/image";
 import {useEffect, useState} from "react";
 import {filterData, getFilterValues} from "../utils/filterData";
-import Router from 'next/router';
 
 const SearchFilters = ({backgroundColor, borderRadius, setSearchFilters}) => {
     const [filters, setFilters] = useState(filterData);
@@ -19,13 +15,12 @@ const SearchFilters = ({backgroundColor, borderRadius, setSearchFilters}) => {
             const value = query[filter.queryName];
             if (value) {
                 setFilters((prevFilters) => {
-                    const newFilters = prevFilters.map((f) => {
+                    return prevFilters.map((f) => {
                         if (f.queryName === filter.queryName) {
-                            return { ...f, selectedValue: value };
+                            return {...f, selectedValue: value};
                         }
                         return f;
                     });
-                    return newFilters;
                 });
             }
         });

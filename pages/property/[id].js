@@ -371,14 +371,14 @@ const PropertyDetails = ({propertyDetails:{price, rentFrequency, rooms, area, wa
                                             Registered with:
                                         </Text>
                                         <Text
-                                        color="blue.500"
-                                        cursor="pointer"
-                                        textDecoration={"underline"}
-                                        onClick={() => router.push(`/agency/${agency}`)}
-                                        mt={2}
-                                    >
-                                        {agencyName}>
-                                    </Text>
+                                            color="blue.500"
+                                            cursor="pointer"
+                                            textDecoration={"underline"}
+                                            onClick={() => router.push(`/agency/${agency}`)}
+                                            mt={2}
+                                        >
+                                            {agencyName}
+                                        </Text>
                                     </>
 
                                 }

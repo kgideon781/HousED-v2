@@ -44,6 +44,7 @@ function Search (){
     const maxPrice = filterQuery.maxPrice
     const areaMax = filterQuery.areaMax
     const roomsMin = filterQuery.roomsMin
+    const bedrooms = filterQuery.bedrooms
     const baths = filterQuery.bathsMin
     const furnishType = filterQuery.furnishType
     const propertyType = filterQuery.propertyType
@@ -159,6 +160,9 @@ function Search (){
         }
 
     });
+
+
+
 
 
     //console.log(filtered)
