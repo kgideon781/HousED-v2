@@ -1,16 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {Avatar, Box, Flex, Image, Text} from "@chakra-ui/react";
+import {Avatar, Badge, Box, Divider, Flex, Heading, Image, Stack, Text} from "@chakra-ui/react";
 import {auth, db} from "../firebase";
 import {useCollection} from "react-firebase-hooks/firestore";
 
 const MyProfile = () => {
     const [currentUser, setCurrentUser] = useState(null);
-    const [role, setRole] = useState("user");
-    const [position, setPosition] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [address, setAddress] = useState("");
     const [agency, setAgency] = useState("");
     const usersRef = db.collection('users');
     const [fullName, setFullName] = useState("No name");
     const userRef = usersRef.doc(currentUser?.uid);
+    const [agencies, loadingAgencies, errorAgencies] = useCollection(
+        db.collection('agencies')
+    );
     const query = currentUser
         ? db.collection('properties').where('uid', '==', currentUser.uid)
         : null;
@@ -21,7 +25,7 @@ const MyProfile = () => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             setCurrentUser(user);
         });
-        //console.log(properties?.docs.map((property) => property.data()));
+
 
         return () => {
             unsubscribe();
@@ -31,11 +35,12 @@ const MyProfile = () => {
         if (currentUser) {
             userRef.get().then((doc) => {
                 if (doc.exists) {
-                    //console.log("Document data:", doc.data());
-                    const agencyArray = doc.data()?.agency;
-                    setAgency(agencyArray.name);
-                    setRole(doc.data().role);
-                    setPosition(doc.data().position);
+                    const userArray = doc.data();
+                    console.log(userArray)
+                    const agency = doc.data()?.agency;
+                    setAgency(userArray.name);
+                    setEmail(userArray.email);
+                    setPhone(userArray.phone);
                 } else {
                     console.log("No such document!");
                 }
@@ -44,6 +49,39 @@ const MyProfile = () => {
             });
         }
     }, [currentUser]);
+    const fetchUserAgency = async () => {
+        if (!currentUser) return;
+        try {
+            // Fetch all agencies
+            const agenciesQuerySnapshot = await db.collection('agencies').get();
+
+            // Loop through each agency to find the one that contains the user in its 'agents' subcollection
+            for (const agencyDoc of agenciesQuerySnapshot.docs) {
+                const agencyID = agencyDoc.id;
+
+                // Check if the user exists in the 'agents' subcollection of the current agency
+                const userInAgencyQuerySnapshot = await db
+                    .collection('agencies')
+                    .doc(agencyID)
+                    .collection('agents')
+                    .doc(currentUser.uid)
+                    .get();
+
+                if (userInAgencyQuerySnapshot.exists) {
+                    // User belongs to this agency
+                    setAgency(agencyDoc.data().name);
+                    //console.log('User belongs to agency:', agencyDoc.data());
+                    return;
+                }
+            }
+
+            // If the loop completes and no agency is found, handle the case where the user does not belong to any agency
+            console.log('User does not belong to any agency');
+        } catch (error) {
+            // Handle any errors that may occur during the query
+            console.error('Error fetching user agency:', error);
+        }
+    };
 
     useEffect(() => {
         if (currentUser) {
@@ -58,110 +96,93 @@ const MyProfile = () => {
                 console.log("Error getting document:", error);
             });
         }
+        fetchUserAgency()
     }, [currentUser]);
 
     return (
-        <Box>
-            <Box
-                bg="gray.200"
-                p={4}
-                borderRadius="md"
-                boxShadow="md"
-            >
-                <Text fontSize="2xl" fontWeight="bold" mb={4}>
-                    My Profile
-                </Text>
-                <Box h={"30vh"}>
-                    <Flex h={"100%"}>
-                        <Box>
-                            <Avatar size="xl" name={fullName} src={fullName && fullName} />
-                        </Box>
-                        <Flex h={"100%"} ml={"5%"}>
-                            <Box>
+    <Flex
+        direction="column"
+        align="center"
+        justify="center"
+        minH="100vh"
+        p={4}
+    >
+        <Avatar size="2xl" name={fullName} src={currentUser?.photoURL} />
 
-                                <Text fontSize="xl" mb={2} fontWeight={"black"} color={"blue.500"}>
-                                    {fullName ? fullName : currentUser?.displayName}
-                                </Text>
-                                <Text fontSize="xl" mb={2} textDecor={"underline"} fontWeight={"thin"}>
-                                    Email: {currentUser?.email}
-                                </Text>
-                                {
-                                    position && <Box>
-                                    <Text fontSize="xl" fontWeight={"bold"}>
-                                    Role:
-                                </Text>
-                                    <Text fontSize="xl" mb={2}   ml={'2%'}>
-                                {position} at {agency}
-                                </Text>
-                                    </Box>
-                                }
-
-                            </Box>
-                        </Flex>
-
-                    </Flex>
-
-                </Box>
-            </Box>
-
-
-            <Box>
-                <Text fontSize="2xl" fontWeight="bold" mb={4} mt={4}>
-                    My Properties
-                </Text>
-                <Box
-                    bg="gray.200"
-                    p={4}
-                    borderRadius="md"
-                    boxShadow="md"
-                >
-                    <Flex maxW={500}>
-                        {loading && <p>Loading...</p>}
-                        {error && <p>Error: {error}</p>}
-                        {/*Fetch properties by current user*/}
-                        {properties?.docs.map((property) => (
-                            <Flex
-                                key={property.id}
-                                bg="white"
-                                borderRadius="md"
-                                boxShadow="md"
-                                mb={4}
-                                gap={2}
-                                h={150}
-                            >
-                                <Box>
-                                    <Image src={property.data().coverPhoto} alt="" width={200} height={"100%"}/>
-                                </Box>
-                                <Box p={4}>
-                                    <Text fontSize="xl" fontWeight="bold" mb={2}>
-                                        {property.data().title}
-                                    </Text>
-                                    <Text fontSize="md" fontWeight="bold" mb={2}>
-                                        {property.data().address}
-                                    </Text>
-                                    <Text fontSize="md" fontWeight="bold" mb={2}>
-                                        {property.data().city}
-                                    </Text>
-                                    <Text fontSize="md" fontWeight="bold" mb={2}>
-                                        {property.data().country}
-                                    </Text>
-                                    <Text fontSize="md" fontWeight="bold" mb={2}>
-                                        {property.data().price}
-                                    </Text>
-                                    <Text fontSize="md" fontWeight="bold" mb={2}>
-                                        {property.data().description}
-                                    </Text>
-                                </Box>
-
-                            </Flex>
-                        ))}
-                    </Flex>
-
-                </Box>
-            </Box>
-
-
+        <Box mt={4} textAlign="center">
+            <Heading as="h1" size="xl">
+                {fullName ? fullName : currentUser?.displayName}
+            </Heading>
+            <Text fontSize="lg" color="gray.600">
+                Real Estate Agent
+            </Text>
+            <Text fontSize="md" color="gray.500" mt={2}>
+                Serving the {agency}
+            </Text>
+            <Stack direction="row" mt={2} spacing={2}>
+                <Badge colorScheme="green">Residential</Badge>
+                <Badge colorScheme="blue">Commercial</Badge>
+            </Stack>
         </Box>
+
+        <Divider my={6} />
+
+        <Box textAlign="left" maxW="600px">
+            <Text fontSize="lg">
+                Welcome to my profile! As a dedicated real estate agent, I am
+                committed to helping you find your dream property. Whether you're
+                buying, selling, or renting, I'm here to guide you through the
+                process.
+            </Text>
+        </Box>
+
+        <Divider my={6} />
+
+        <Heading as="h2" size="xl" mb={4}>
+            Featured Listings
+        </Heading>
+
+        {/* Displaying fetched properties */}
+        {properties?.docs.map((property) => (
+            <Box
+                key={property.id}
+                borderWidth="1px"
+                borderRadius="lg"
+                overflow="hidden"
+                boxShadow="lg"
+                p={4}
+                mb={4}
+            >
+                <Image src={property.data().coverPhoto} alt="Listing Image" />
+
+                <Text fontSize="lg" mt={2}>
+                    {property.data().title}
+                </Text>
+
+                <Stack direction="row" mt={2} spacing={2}>
+                    <Badge colorScheme="green">{property.data().status}</Badge>
+                    <Badge colorScheme="blue">{property.data().price}</Badge>
+                </Stack>
+            </Box>
+        ))}
+
+        <Divider my={6} />
+
+        <Heading as="h2" size="xl" mb={4}>
+            Contact Information
+        </Heading>
+
+        <Box textAlign="left" maxW="600px">
+            <Text fontSize="lg">
+                Feel free to contact me for any inquiries or assistance:
+            </Text>
+            <Stack spacing={2} mt={4}>
+                <Text>Email: {email} </Text>
+                <Text>Phone: {phone}</Text>
+                <Text>Address: {address}</Text>
+            </Stack>
+        </Box>
+    </Flex>
     );
 };
 
